@@ -8,6 +8,7 @@ import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.enableCors();
   app.set('query parser', 'extended');
 
   app.useGlobalPipes(
