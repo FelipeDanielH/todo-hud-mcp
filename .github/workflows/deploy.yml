@@ -1,14 +1,19 @@
-name: Deploy TODO HUD to Oracle VPS
+name: Deploy Focus HUD
 
 on:
   push:
     branches:
       - main
 
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
 jobs:
   deploy:
     name: Deploy to Oracle VPS
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Deploy over SSH
@@ -18,22 +23,33 @@ jobs:
           username: ${{ secrets.ORACLE_USER }}
           key: ${{ secrets.ORACLE_SSH_KEY }}
           script: |
-            set -e
+            set -euo pipefail
 
-            echo "📦 Entering app directory..."
             cd ${{ secrets.APP_DIR }}
 
-            echo "🔄 Pulling latest changes..."
-            git pull origin main
+            echo "🔄 Sync repository with origin/main..."
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
 
-            echo "🐳 Rebuilding and restarting Docker containers..."
-            docker compose up -d --build
+            echo "🐳 Build and restart container..."
+            docker compose up -d --build --remove-orphans
 
-            echo "🧹 Cleaning unused Docker images..."
+            echo "🧹 Prune unused Docker images..."
             docker image prune -f
 
-            echo "❤️ Checking local health endpoint..."
-            sleep 5
-            curl -f http://127.0.0.1:3000/health
+            echo "❤️ Waiting for health check..."
+            for i in {1..20}; do
+              if curl -fsS http://127.0.0.1:3000/health > /dev/null; then
+                echo "✅ App is healthy"
+                docker ps --filter "name=focus-hud"
+                exit 0
+              fi
 
-            echo "✅ Deploy completed successfully"
+              echo "Waiting for app... attempt $i/20"
+              sleep 3
+            done
+
+            echo "❌ App did not become healthy"
+            docker logs --tail=80 focus-hud
+            exit 1
