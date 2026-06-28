@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case';
+import { CompleteTaskUseCase } from '../../application/use-cases/complete-task.use-case';
+import { TaskNotFoundError } from '../../domain/exceptions/task-not-found.error';
 
 export interface McpToolContent {
   type: 'text';
@@ -44,6 +46,7 @@ export class McpHandlerService {
   constructor(
     private readonly createTaskUseCase: CreateTaskUseCase,
     private readonly listTasksUseCase: ListTasksUseCase,
+    private readonly completeTaskUseCase: CompleteTaskUseCase,
   ) {
     this.tools = this.buildTools();
   }
@@ -111,6 +114,48 @@ export class McpHandlerService {
               },
             ],
           };
+        },
+      },
+      {
+        name: 'complete_task',
+        description: 'Mark an existing task as completed by its ID',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'ID of the task to complete',
+            },
+          },
+          required: ['id'],
+        },
+        handler: async (args) => {
+          const id = args.id as unknown;
+          if (!id || typeof id !== 'string') {
+            return {
+              content: [{ type: 'text', text: 'id must be a non-empty string' }],
+              isError: true,
+            };
+          }
+          try {
+            const updated = await this.completeTaskUseCase.execute(id);
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(updated, null, 2),
+                },
+              ],
+            };
+          } catch (error) {
+            if (error instanceof TaskNotFoundError) {
+              return {
+                content: [{ type: 'text', text: `Task not found: ${id}` }],
+                isError: true,
+              };
+            }
+            throw error;
+          }
         },
       },
     ];

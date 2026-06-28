@@ -4,6 +4,7 @@ import * as z from 'zod/v4';
 import { JsonTasksRepository } from '../adapters/json-tasks.repository';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case';
+import { CompleteTaskUseCase } from '../../application/use-cases/complete-task.use-case';
 import { McpHandlerService } from './mcp.handler.service';
 
 async function main(): Promise<void> {
@@ -12,6 +13,7 @@ async function main(): Promise<void> {
   const handler = new McpHandlerService(
     new CreateTaskUseCase(repo),
     new ListTasksUseCase(repo),
+    new CompleteTaskUseCase(repo),
   );
 
   const server = new McpServer({
