@@ -1,4 +1,4 @@
-name: Deploy Focus HUD
+name: Deploy TODO HUD to Oracle VPS
 
 on:
   push:
