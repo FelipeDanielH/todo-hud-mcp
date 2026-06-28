@@ -1,8 +1,9 @@
 import { Task } from '../../domain/models/task';
+import { BaseRepository } from './base.repository';
 
 export const TASKS_REPOSITORY_PORT = 'TASKS_REPOSITORY_PORT';
 
-export interface TasksRepositoryPort {
+export interface TasksRepositoryPort extends BaseRepository<Task> {
   findAll(): Promise<Task[]>;
   findById(id: string): Promise<Task | null>;
   save(task: Task): Promise<Task>;
