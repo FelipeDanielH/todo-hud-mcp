@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
+    "start:prod": "node dist/main.js",
     "start:dev": "ts-node-dev --respawn src/main.ts",
     "mcp": "tsx src/modules/tasks/infrastructure/mcp/tasks-mcp-server.mts",
     "test": "jest",

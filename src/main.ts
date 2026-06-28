@@ -38,12 +38,13 @@ async function bootstrap(): Promise<void> {
     res.type('text/yaml').send(yaml.dump(document));
   });
 
+  const host = process.env.HOST ?? '0.0.0.0';
   const port = process.env.PORT ?? 3000;
-  await app.listen(port);
-  console.log(`Focus HUD backend running on http://localhost:${port}`);
-  console.log(`Swagger UI: http://localhost:${port}/docs`);
-  console.log(`OpenAPI JSON: http://localhost:${port}/openapi.json`);
-  console.log(`OpenAPI YAML: http://localhost:${port}/openapi.yaml`);
+  await app.listen(port, host);
+  console.log(`Focus HUD backend running on http://${host}:${port}`);
+  console.log(`Swagger UI: http://${host}:${port}/docs`);
+  console.log(`OpenAPI JSON: http://${host}:${port}/openapi.json`);
+  console.log(`OpenAPI YAML: http://${host}:${port}/openapi.yaml`);
 }
 
 bootstrap();

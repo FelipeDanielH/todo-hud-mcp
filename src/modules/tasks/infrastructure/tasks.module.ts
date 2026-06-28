@@ -17,7 +17,10 @@ import {
 @Module({
   controllers: [TasksController, McpController],
   providers: [
-    { provide: TASKS_REPOSITORY_PORT, useClass: JsonTasksRepository },
+    {
+      provide: TASKS_REPOSITORY_PORT,
+      useFactory: () => new JsonTasksRepository(process.env.DATA_PATH),
+    },
     CreateTaskUseCase,
     GetTaskUseCase,
     ListTasksUseCase,

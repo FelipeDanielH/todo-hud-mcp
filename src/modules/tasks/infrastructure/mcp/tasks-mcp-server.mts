@@ -7,7 +7,8 @@ import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-cas
 import { McpHandlerService } from './mcp.handler.service';
 
 async function main(): Promise<void> {
-  const repo = new JsonTasksRepository();
+  const dataPath = process.env.DATA_PATH;
+  const repo = new JsonTasksRepository(dataPath);
   const handler = new McpHandlerService(
     new CreateTaskUseCase(repo),
     new ListTasksUseCase(repo),
