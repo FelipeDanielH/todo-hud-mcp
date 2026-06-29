@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 #include "infrastructure/InMemoryTaskRepository.h"
 #include "application/TaskService.h"
 #include "presentation/TaskListModel.h"
@@ -12,6 +13,7 @@ int main(int argc, char* argv[])
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("Focus HUD"));
     app.setApplicationVersion(QStringLiteral("0.1.0"));
+    QQuickStyle::setStyle(QStringLiteral("Basic"));
 
     InMemoryTaskRepository repository;
     TaskService taskService(&repository);

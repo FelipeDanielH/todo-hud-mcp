@@ -12,15 +12,16 @@ Button {
 
     background: Rectangle {
         radius: Theme.radius
-        color: root.down ? "#00b898" : (root.hovered ? "#00e6b3" : Theme.accent)
+        color: root.down ? Theme.accentPressed : Theme.accent
     }
 
     contentItem: Text {
         text: root.label
-        anchors.centerIn: parent
-        color: "#0f0f1a"
+        color: Theme.text
         font { pixelSize: 14; weight: Font.Bold; family: Theme.fontFamily }
         horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        elide: Text.ElideRight
     }
 
     Behavior on scale {
