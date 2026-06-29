@@ -10,23 +10,43 @@ TaskListModel::TaskListModel(TaskService& service, QObject* parent)
 
 int TaskListModel::rowCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : m_tasks.size();
+    return parent.isValid() ? 0 : m_activeTasks.size() + m_completedTasks.size() + 1;
 }
 
 QVariant TaskListModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() || index.row() >= m_tasks.size())
+    if (!index.isValid() || index.row() >= rowCount())
         return {};
 
-    const auto& task = m_tasks.at(index.row());
+    const int row = index.row();
+    const int activeCount = m_activeTasks.size();
+
+    // Section header for completed
+    if (row == activeCount && m_completedTasks.size() > 0) {
+        if (role == TitleRole)
+            return QStringLiteral("COMPLETED %1").arg(m_completedTasks.size());
+        if (role == StatusRole)
+            return QStringLiteral("section-completed");
+        return {};
+    }
+
+    const Task* task = nullptr;
+    if (row < activeCount) {
+        task = &m_activeTasks.at(row);
+    } else if (row > activeCount) {
+        task = &m_completedTasks.at(row - activeCount - 1);
+    }
+
+    if (!task) return {};
 
     switch (role) {
-    case IdRole:           return task.id;
-    case TitleRole:        return task.title;
-    case CompletedRole:    return task.completed;
-    case StatusTextRole:   return task.completed
-                                ? QStringLiteral("completada")
-                                : QStringLiteral("pendiente");
+    case IdRole:           return task->id;
+    case TitleRole:        return task->title;
+    case CompletedRole:    return task->completed;
+    case StatusRole:       return task->status;
+    case PhaseIdRole:      return task->phaseId;
+    case PhaseNameRole:    return task->phaseName;
+    case SortOrderRole:    return task->sortOrder;
     }
     return {};
 }
@@ -37,13 +57,32 @@ QHash<int, QByteArray> TaskListModel::roleNames() const
         {IdRole,         "taskId"},
         {TitleRole,      "title"},
         {CompletedRole,  "completed"},
-        {StatusTextRole, "statusText"},
+        {StatusRole,     "status"},
+        {PhaseIdRole,    "phaseId"},
+        {PhaseNameRole,  "phaseName"},
+        {SortOrderRole,  "sortOrder"},
     };
 }
 
 void TaskListModel::refresh()
 {
     beginResetModel();
-    m_tasks = m_service.allTasks();
+    m_activeTasks = m_service.activeTasks();
+    m_completedTasks = m_service.completedTasks();
     endResetModel();
+}
+
+QVector<Task> TaskListModel::activeTasks() const
+{
+    return m_activeTasks;
+}
+
+QVector<Task> TaskListModel::completedTasks() const
+{
+    return m_completedTasks;
+}
+
+int TaskListModel::completedCount() const
+{
+    return m_completedTasks.size();
 }

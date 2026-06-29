@@ -34,8 +34,20 @@ export class NeonTasksRepository implements TasksRepositoryPort {
     throw new Error('NeonTasksRepository#findById not implemented. Use JsonTasksRepository for now.');
   }
 
+  async findByPhase(_phaseId: string): Promise<Task[]> {
+    throw new Error('NeonTasksRepository#findByPhase not implemented. Use JsonTasksRepository for now.');
+  }
+
+  async findArchived(): Promise<Task[]> {
+    throw new Error('NeonTasksRepository#findArchived not implemented. Use JsonTasksRepository for now.');
+  }
+
   async save(_task: Task): Promise<Task> {
     throw new Error('NeonTasksRepository#save not implemented. Use JsonTasksRepository for now.');
+  }
+
+  async saveAll(_tasks: Task[]): Promise<Task[]> {
+    throw new Error('NeonTasksRepository#saveAll not implemented. Use JsonTasksRepository for now.');
   }
 
   async update(_id: string, _data: Partial<Omit<Task, 'id' | 'createdAt'>>): Promise<Task | null> {

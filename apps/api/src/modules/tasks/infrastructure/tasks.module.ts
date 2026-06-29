@@ -12,6 +12,9 @@ import {
   CompleteTaskUseCase,
   ReopenTaskUseCase,
   DeleteTaskUseCase,
+  CreateBatchUseCase,
+  ArchiveTasksUseCase,
+  ListArchivedUseCase,
 } from '../application/use-cases';
 
 @Module({
@@ -28,6 +31,9 @@ import {
     CompleteTaskUseCase,
     ReopenTaskUseCase,
     DeleteTaskUseCase,
+    CreateBatchUseCase,
+    ArchiveTasksUseCase,
+    ListArchivedUseCase,
     McpHandlerService,
   ],
 })

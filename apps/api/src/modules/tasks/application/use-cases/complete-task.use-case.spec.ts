@@ -11,7 +11,10 @@ describe('CompleteTaskUseCase', () => {
     mockRepo = {
       findAll: jest.fn(),
       findById: jest.fn(),
+      findByPhase: jest.fn(),
+      findArchived: jest.fn(),
       save: jest.fn(),
+      saveAll: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     };
@@ -32,6 +35,11 @@ describe('CompleteTaskUseCase', () => {
         task.createdAt,
         now,
         now,
+        'completed',
+        task.phaseId,
+        task.phaseName,
+        undefined,
+        task.sortOrder,
       );
     });
 

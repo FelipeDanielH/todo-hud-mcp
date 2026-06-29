@@ -25,4 +25,14 @@ export class CreateTaskDto {
   @IsOptional()
   @IsEnum(Priority)
   priority?: Priority;
+
+  @ApiPropertyOptional({ description: 'Phase ID to associate the task with' })
+  @IsOptional()
+  @IsString()
+  phaseId?: string;
+
+  @ApiPropertyOptional({ description: 'Phase name (display label)' })
+  @IsOptional()
+  @IsString()
+  phaseName?: string;
 }

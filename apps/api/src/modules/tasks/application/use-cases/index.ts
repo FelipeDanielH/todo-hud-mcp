@@ -5,3 +5,6 @@ export * from './update-task.use-case';
 export * from './complete-task.use-case';
 export * from './reopen-task.use-case';
 export * from './delete-task.use-case';
+export * from './create-batch.use-case';
+export * from './archive-tasks.use-case';
+export * from './list-archived.use-case';

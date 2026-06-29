@@ -11,7 +11,10 @@ describe('GetTaskUseCase', () => {
     mockRepo = {
       findAll: jest.fn(),
       findById: jest.fn(),
+      findByPhase: jest.fn(),
+      findArchived: jest.fn(),
       save: jest.fn(),
+      saveAll: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     };

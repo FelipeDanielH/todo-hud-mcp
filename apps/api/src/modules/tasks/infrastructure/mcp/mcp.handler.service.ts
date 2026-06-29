@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case';
 import { CompleteTaskUseCase } from '../../application/use-cases/complete-task.use-case';
+import { CreateBatchUseCase } from '../../application/use-cases/create-batch.use-case';
+import { ArchiveTasksUseCase } from '../../application/use-cases/archive-tasks.use-case';
 import { TaskNotFoundError } from '../../domain/exceptions/task-not-found.error';
 
 export interface McpToolContent {
@@ -47,6 +49,8 @@ export class McpHandlerService {
     private readonly createTaskUseCase: CreateTaskUseCase,
     private readonly listTasksUseCase: ListTasksUseCase,
     private readonly completeTaskUseCase: CompleteTaskUseCase,
+    private readonly createBatchUseCase: CreateBatchUseCase,
+    private readonly archiveTasksUseCase: ArchiveTasksUseCase,
   ) {
     this.tools = this.buildTools();
   }
@@ -91,6 +95,49 @@ export class McpHandlerService {
                   null,
                   2,
                 ),
+              },
+            ],
+          };
+        },
+      },
+      {
+        name: 'create_batch',
+        description: 'Create a batch of tasks as a named phase',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            phaseName: {
+              type: 'string',
+              description: 'Name of the phase (e.g. "Lab 281 - Fase 1")',
+            },
+            tasks: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'List of task titles for this phase',
+            },
+          },
+          required: ['phaseName', 'tasks'],
+        },
+        handler: async (args) => {
+          const phaseName = args.phaseName as unknown;
+          const tasks = args.tasks as unknown;
+          if (typeof phaseName !== 'string' || !Array.isArray(tasks) || tasks.length === 0) {
+            return {
+              content: [
+                { type: 'text', text: 'phaseName must be a string and tasks a non-empty array' },
+              ],
+              isError: true,
+            };
+          }
+          const result = await this.createBatchUseCase.execute({
+            phaseName,
+            tasks: tasks as string[],
+          });
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
               },
             ],
           };
@@ -156,6 +203,31 @@ export class McpHandlerService {
             }
             throw error;
           }
+        },
+      },
+      {
+        name: 'archive_tasks',
+        description: 'Archive all completed tasks, optionally filtered by phaseId',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            phaseId: {
+              type: 'string',
+              description: 'Optional phase ID to archive only tasks in that phase',
+            },
+          },
+        },
+        handler: async (args) => {
+          const phaseId = args.phaseId as string | undefined;
+          const result = await this.archiveTasksUseCase.execute(phaseId);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
         },
       },
     ];

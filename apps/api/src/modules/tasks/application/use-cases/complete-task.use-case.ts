@@ -12,7 +12,12 @@ export class CompleteTaskUseCase {
     if (!task) throw new TaskNotFoundError(id);
 
     const completed = task.complete();
-    const saved = await this.repo.update(id, completed);
+    const saved = await this.repo.update(id, {
+      completed: true,
+      status: 'completed',
+      completedAt: completed.completedAt,
+      updatedAt: completed.updatedAt,
+    });
     if (!saved) throw new TaskNotFoundError(id);
     return saved;
   }

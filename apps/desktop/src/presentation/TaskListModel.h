@@ -14,7 +14,10 @@ public:
         IdRole = Qt::UserRole + 1,
         TitleRole,
         CompletedRole,
-        StatusTextRole,
+        StatusRole,
+        PhaseIdRole,
+        PhaseNameRole,
+        SortOrderRole,
     };
 
     explicit TaskListModel(TaskService& service, QObject* parent = nullptr);
@@ -25,7 +28,12 @@ public:
 
     Q_INVOKABLE void refresh();
 
+    QVector<Task> activeTasks() const;
+    QVector<Task> completedTasks() const;
+    int completedCount() const;
+
 private:
     TaskService& m_service;
-    QVector<Task> m_tasks;
+    QVector<Task> m_activeTasks;
+    QVector<Task> m_completedTasks;
 };

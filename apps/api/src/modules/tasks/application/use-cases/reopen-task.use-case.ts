@@ -12,7 +12,12 @@ export class ReopenTaskUseCase {
     if (!task) throw new TaskNotFoundError(id);
 
     const reopened = task.reopen();
-    const saved = await this.repo.update(id, reopened);
+    const saved = await this.repo.update(id, {
+      completed: false,
+      status: 'pending',
+      completedAt: undefined,
+      updatedAt: reopened.updatedAt,
+    });
     if (!saved) throw new TaskNotFoundError(id);
     return saved;
   }

@@ -2,6 +2,8 @@ import { McpHandlerService } from './mcp.handler.service';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case';
 import { CompleteTaskUseCase } from '../../application/use-cases/complete-task.use-case';
+import { CreateBatchUseCase } from '../../application/use-cases/create-batch.use-case';
+import { ArchiveTasksUseCase } from '../../application/use-cases/archive-tasks.use-case';
 import { TasksRepositoryPort } from '../../application/ports/tasks-repository.port';
 import { Task } from '../../domain/models/task';
 import { TaskNotFoundError } from '../../domain/exceptions/task-not-found.error';
@@ -14,7 +16,10 @@ describe('McpHandlerService', () => {
     mockRepo = {
       findAll: jest.fn(),
       findById: jest.fn(),
+      findByPhase: jest.fn(),
+      findArchived: jest.fn(),
       save: jest.fn(),
+      saveAll: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
     };
@@ -22,17 +27,21 @@ describe('McpHandlerService', () => {
       new CreateTaskUseCase(mockRepo),
       new ListTasksUseCase(mockRepo),
       new CompleteTaskUseCase(mockRepo),
+      new CreateBatchUseCase(mockRepo),
+      new ArchiveTasksUseCase(mockRepo),
     );
   });
 
   describe('getToolList', () => {
     it('should return all three tools', () => {
       const tools = handler.getToolList();
-      expect(tools).toHaveLength(3);
+      expect(tools).toHaveLength(5);
       const names = tools.map((t) => t.name);
       expect(names).toContain('set_tasks');
+      expect(names).toContain('create_batch');
       expect(names).toContain('list_tasks');
       expect(names).toContain('complete_task');
+      expect(names).toContain('archive_tasks');
     });
 
     it('should have correct inputSchema for complete_task', () => {

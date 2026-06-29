@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,6 +16,7 @@ import {
   ApiCreatedResponse,
   ApiBadRequestResponse,
   ApiNotFoundResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { TaskNotFoundError } from '../../domain/exceptions';
 import {
@@ -25,8 +27,11 @@ import {
   CompleteTaskUseCase,
   ReopenTaskUseCase,
   DeleteTaskUseCase,
+  CreateBatchUseCase,
+  ArchiveTasksUseCase,
+  ListArchivedUseCase,
 } from '../../application/use-cases';
-import { CreateTaskDto, UpdateTaskDto } from './dto';
+import { CreateTaskDto, UpdateTaskDto, CreateBatchDto, ArchiveBodyDto } from './dto';
 import { Task } from '../../domain/models';
 
 @ApiTags('Tasks')
@@ -40,13 +45,28 @@ export class TasksController {
     private readonly completeTask: CompleteTaskUseCase,
     private readonly reopenTask: ReopenTaskUseCase,
     private readonly deleteTask: DeleteTaskUseCase,
+    private readonly createBatchUseCase: CreateBatchUseCase,
+    private readonly archiveTasksUseCase: ArchiveTasksUseCase,
+    private readonly listArchivedUseCase: ListArchivedUseCase,
   ) {}
 
   @Get()
   @ApiOperation({ summary: 'List all tasks' })
   @ApiOkResponse({ description: 'List of tasks' })
-  async findAll(): Promise<Task[]> {
-    return this.listTasks.execute();
+  @ApiQuery({ name: 'status', required: false, description: 'Filter by status (pending, completed, archived)' })
+  async findAll(@Query('status') status?: string): Promise<Task[]> {
+    const all = await this.listTasks.execute();
+    if (status) {
+      return all.filter((t) => t.status === status);
+    }
+    return all;
+  }
+
+  @Get('history')
+  @ApiOperation({ summary: 'List archived tasks grouped by phase' })
+  @ApiOkResponse({ description: 'Archived phases with tasks' })
+  async history(): Promise<unknown> {
+    return this.listArchivedUseCase.execute();
   }
 
   @Get(':id')
@@ -68,6 +88,25 @@ export class TasksController {
   @ApiBadRequestResponse({ description: 'Invalid input' })
   async create(@Body() dto: CreateTaskDto): Promise<Task> {
     return this.createTask.execute(dto);
+  }
+
+  @Post('batch')
+  @ApiOperation({ summary: 'Create a batch of tasks under a phase' })
+  @ApiCreatedResponse({ description: 'Batch created with phaseId and tasks' })
+  @ApiBadRequestResponse({ description: 'Invalid input' })
+  async createBatch(@Body() dto: CreateBatchDto): Promise<{
+    phaseId: string;
+    phaseName: string;
+    tasks: Task[];
+  }> {
+    return this.createBatchUseCase.execute(dto);
+  }
+
+  @Post('archive')
+  @ApiOperation({ summary: 'Archive all completed tasks, optionally filtered by phaseId' })
+  @ApiOkResponse({ description: 'Tasks archived' })
+  async archive(@Body() dto: ArchiveBodyDto): Promise<{ archived: number; archivedAt: string }> {
+    return this.archiveTasksUseCase.execute(dto.phaseId);
   }
 
   @Patch(':id')

@@ -5,6 +5,8 @@ import { JsonTasksRepository } from '../adapters/json-tasks.repository';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case';
 import { CompleteTaskUseCase } from '../../application/use-cases/complete-task.use-case';
+import { CreateBatchUseCase } from '../../application/use-cases/create-batch.use-case';
+import { ArchiveTasksUseCase } from '../../application/use-cases/archive-tasks.use-case';
 import { McpHandlerService } from './mcp.handler.service';
 
 async function main(): Promise<void> {
@@ -14,6 +16,8 @@ async function main(): Promise<void> {
     new CreateTaskUseCase(repo),
     new ListTasksUseCase(repo),
     new CompleteTaskUseCase(repo),
+    new CreateBatchUseCase(repo),
+    new ArchiveTasksUseCase(repo),
   );
 
   const server = new McpServer({
@@ -28,8 +32,10 @@ async function main(): Promise<void> {
       for (const [key, val] of Object.entries(props)) {
         if (val.type === 'array') {
           zodProps[key] = z.array(z.string()).min(1);
+        } else if (val.type === 'object') {
+          zodProps[key] = z.object({}).optional();
         } else {
-          zodProps[key] = z.string();
+          zodProps[key] = z.string().optional();
         }
       }
     }
