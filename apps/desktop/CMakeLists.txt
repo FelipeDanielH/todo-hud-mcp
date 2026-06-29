@@ -18,6 +18,8 @@ qt_add_executable(FocusHud
     src/infrastructure/ApiTaskRepository.h
     src/infrastructure/InMemoryTaskRepository.cpp
     src/infrastructure/InMemoryTaskRepository.h
+    src/infrastructure/WebSocketClient.cpp
+    src/infrastructure/WebSocketClient.h
     src/presentation/AppController.cpp
     src/presentation/AppController.h
     src/presentation/TaskListModel.cpp

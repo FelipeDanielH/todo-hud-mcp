@@ -1,3 +1,7 @@
+// @tech-debt ApiTaskRepository uses synchronous (blocking) HTTP calls via QEventLoop.
+// Future improvement: migrate to async QNetworkReply + signal/slot or
+// QtConcurrent to avoid blocking the UI thread during GET /tasks refresh from WebSocket events.
+
 #pragma once
 #include <QString>
 #include <QVector>

@@ -2,6 +2,9 @@ import { CompleteTaskUseCase } from './complete-task.use-case';
 import { TasksRepositoryPort } from '../ports/tasks-repository.port';
 import { Task } from '../../domain/models/task';
 import { TaskNotFoundError } from '../../domain/exceptions';
+import { mockTaskEventsPublisher } from '../services/task-events-publisher.mock';
+
+jest.mock('../services/task-events-publisher');
 
 describe('CompleteTaskUseCase', () => {
   let useCase: CompleteTaskUseCase;
@@ -18,7 +21,7 @@ describe('CompleteTaskUseCase', () => {
       update: jest.fn(),
       delete: jest.fn(),
     };
-    useCase = new CompleteTaskUseCase(mockRepo);
+    useCase = new CompleteTaskUseCase(mockRepo, mockTaskEventsPublisher as any);
   });
 
   it('should complete a task', async () => {

@@ -7,6 +7,9 @@ import { ArchiveTasksUseCase } from '../../application/use-cases/archive-tasks.u
 import { TasksRepositoryPort } from '../../application/ports/tasks-repository.port';
 import { Task } from '../../domain/models/task';
 import { TaskNotFoundError } from '../../domain/exceptions/task-not-found.error';
+import { mockTaskEventsPublisher } from '../../application/services/task-events-publisher.mock';
+
+jest.mock('../../application/services/task-events-publisher');
 
 describe('McpHandlerService', () => {
   let handler: McpHandlerService;
@@ -24,11 +27,11 @@ describe('McpHandlerService', () => {
       delete: jest.fn(),
     };
     handler = new McpHandlerService(
-      new CreateTaskUseCase(mockRepo),
+      new CreateTaskUseCase(mockRepo, mockTaskEventsPublisher as any),
       new ListTasksUseCase(mockRepo),
-      new CompleteTaskUseCase(mockRepo),
-      new CreateBatchUseCase(mockRepo),
-      new ArchiveTasksUseCase(mockRepo),
+      new CompleteTaskUseCase(mockRepo, mockTaskEventsPublisher as any),
+      new CreateBatchUseCase(mockRepo, mockTaskEventsPublisher as any),
+      new ArchiveTasksUseCase(mockRepo, mockTaskEventsPublisher as any),
     );
   });
 

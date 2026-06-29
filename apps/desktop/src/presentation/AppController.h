@@ -5,6 +5,7 @@
 #include "FocusTimerController.h"
 
 class TaskService;
+class WebSocketClient;
 
 struct TaskListModelQmlForeign {
     Q_GADGET
@@ -28,13 +29,15 @@ class AppController : public QObject {
     Q_PROPERTY(TaskListModel* taskListModel READ taskListModel CONSTANT)
     Q_PROPERTY(FocusTimerController* focusTimer READ focusTimer CONSTANT)
     Q_PROPERTY(int completedCount READ completedCount NOTIFY dataChanged)
-    Q_PROPERTY(bool online READ isOnline CONSTANT)
+    Q_PROPERTY(bool online READ isOnline NOTIFY wsStateChanged)
+    Q_PROPERTY(int wsState READ wsState NOTIFY wsStateChanged)
 
 public:
     explicit AppController(TaskService& taskService,
                            TaskListModel& taskListModel,
                            FocusTimerController& focusTimer,
                            bool online,
+                           WebSocketClient* wsClient = nullptr,
                            QObject* parent = nullptr);
 
     QString currentTaskTitle() const;
@@ -43,6 +46,7 @@ public:
     FocusTimerController* focusTimer() const;
     int completedCount() const;
     bool isOnline() const;
+    int wsState() const;
 
     Q_INVOKABLE void selectTask(int id);
     Q_INVOKABLE void completeCurrentTask();
@@ -50,15 +54,20 @@ public:
     Q_INVOKABLE void completeTask(int id);
     Q_INVOKABLE void createTask(const QString& title);
     Q_INVOKABLE void archiveCompleted();
+    Q_INVOKABLE void forceRefresh();
 
 signals:
     void currentTaskChanged();
     void dataChanged();
+    void wsStateChanged();
 
 private:
+    void onWsTasksChanged();
+
     TaskService& m_taskService;
     TaskListModel& m_taskListModel;
     FocusTimerController& m_focusTimer;
+    WebSocketClient* m_wsClient = nullptr;
     int m_currentTaskId = -1;
     bool m_online = false;
 };

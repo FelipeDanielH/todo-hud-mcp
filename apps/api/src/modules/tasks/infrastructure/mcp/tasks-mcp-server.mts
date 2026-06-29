@@ -2,6 +2,8 @@ import { McpServer } from '@modelcontextprotocol/server';
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 import * as z from 'zod/v4';
 import { JsonTasksRepository } from '../adapters/json-tasks.repository';
+import { InMemoryEventBus } from '../adapters/in-memory-event-bus';
+import { TaskEventsPublisher } from '../../application/services/task-events-publisher';
 import { CreateTaskUseCase } from '../../application/use-cases/create-task.use-case';
 import { ListTasksUseCase } from '../../application/use-cases/list-tasks.use-case';
 import { CompleteTaskUseCase } from '../../application/use-cases/complete-task.use-case';
@@ -12,12 +14,14 @@ import { McpHandlerService } from './mcp.handler.service';
 async function main(): Promise<void> {
   const dataPath = process.env.DATA_PATH;
   const repo = new JsonTasksRepository(dataPath);
+  const eventBus = new InMemoryEventBus();
+  const events = new TaskEventsPublisher(eventBus);
   const handler = new McpHandlerService(
-    new CreateTaskUseCase(repo),
+    new CreateTaskUseCase(repo, events),
     new ListTasksUseCase(repo),
-    new CompleteTaskUseCase(repo),
-    new CreateBatchUseCase(repo),
-    new ArchiveTasksUseCase(repo),
+    new CompleteTaskUseCase(repo, events),
+    new CreateBatchUseCase(repo, events),
+    new ArchiveTasksUseCase(repo, events),
   );
 
   const server = new McpServer({

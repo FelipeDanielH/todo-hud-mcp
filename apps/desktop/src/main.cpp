@@ -4,12 +4,22 @@
 #include <QVariant>
 #include <QDebug>
 #include <QProcessEnvironment>
+#include <QUrl>
 #include "infrastructure/ApiTaskRepository.h"
 #include "infrastructure/InMemoryTaskRepository.h"
+#include "infrastructure/WebSocketClient.h"
 #include "application/TaskService.h"
 #include "presentation/TaskListModel.h"
 #include "presentation/FocusTimerController.h"
 #include "presentation/AppController.h"
+
+static QUrl deriveWsUrl(const QString& apiUrl)
+{
+    QUrl url(apiUrl);
+    url.setScheme(url.scheme() == QStringLiteral("https") ? QStringLiteral("wss") : QStringLiteral("ws"));
+    url.setPath(QStringLiteral("/ws/tasks"));
+    return url;
+}
 
 int main(int argc, char* argv[])
 {
@@ -23,7 +33,6 @@ int main(int argc, char* argv[])
 
     qDebug().noquote() << QStringLiteral("[FocusHUD] FOCUS_HUD_API_URL = %1").arg(apiUrl);
 
-    // Try API repository first
     ApiTaskRepository apiRepo(apiUrl);
     bool online = apiRepo.isConnected();
 
@@ -42,7 +51,14 @@ int main(int argc, char* argv[])
     TaskService taskService(*repo);
     TaskListModel taskListModel(taskService);
     FocusTimerController focusTimer;
-    AppController appController(taskService, taskListModel, focusTimer, online);
+
+    WebSocketClient* wsClient = nullptr;
+    if (online) {
+        const QUrl wsUrl = deriveWsUrl(apiUrl);
+        wsClient = new WebSocketClient(wsUrl, &app);
+    }
+
+    AppController appController(taskService, taskListModel, focusTimer, online, wsClient);
 
     QQmlApplicationEngine engine;
     engine.setInitialProperties({

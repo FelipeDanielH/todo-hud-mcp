@@ -1,6 +1,9 @@
 import { CreateTaskUseCase } from './create-task.use-case';
 import { TasksRepositoryPort } from '../ports/tasks-repository.port';
 import { Task } from '../../domain/models/task';
+import { mockTaskEventsPublisher } from '../services/task-events-publisher.mock';
+
+jest.mock('../services/task-events-publisher');
 
 describe('CreateTaskUseCase', () => {
   let useCase: CreateTaskUseCase;
@@ -17,7 +20,7 @@ describe('CreateTaskUseCase', () => {
       update: jest.fn(),
       delete: jest.fn(),
     };
-    useCase = new CreateTaskUseCase(mockRepo);
+    useCase = new CreateTaskUseCase(mockRepo, mockTaskEventsPublisher as any);
   });
 
   it('should create a task', async () => {

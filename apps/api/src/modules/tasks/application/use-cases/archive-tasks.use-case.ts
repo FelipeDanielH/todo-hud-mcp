@@ -1,10 +1,14 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Task } from '../../domain/models';
 import { TasksRepositoryPort, TASKS_REPOSITORY_PORT } from '../ports/tasks-repository.port';
+import { TaskEventsPublisher } from '../services/task-events-publisher';
 
 @Injectable()
 export class ArchiveTasksUseCase {
-  constructor(@Inject(TASKS_REPOSITORY_PORT) private readonly repo: TasksRepositoryPort) {}
+  constructor(
+    @Inject(TASKS_REPOSITORY_PORT) private readonly repo: TasksRepositoryPort,
+    private readonly events: TaskEventsPublisher,
+  ) {}
 
   async execute(phaseId?: string): Promise<{ archived: number; archivedAt: string }> {
     const all = await this.repo.findAll();
@@ -19,6 +23,7 @@ export class ArchiveTasksUseCase {
       await this.repo.update(task.id, archived);
     }
 
+    await this.events.tasksArchived(toArchive.length, phaseId);
     return { archived: toArchive.length, archivedAt: now };
   }
 }

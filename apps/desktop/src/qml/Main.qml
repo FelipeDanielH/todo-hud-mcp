@@ -1,5 +1,3 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
@@ -76,7 +74,13 @@ Window {
                 Layout.fillHeight: true
                 visible: !win.compactMode && !win.showHistory
                 header: "Tareas"
-                badge: win.app.online ? "" : "Offline"
+                badge: {
+                    if (!win.app.online) return "Offline";
+                    if (win.app.wsState === 0) return "";
+                    if (win.app.wsState === 2) return "";
+                    if (win.app.wsState === 3) return "Reconnecting…";
+                    return "";
+                }
 
                 ListView {
                     id: activeList
@@ -141,15 +145,16 @@ Window {
                     anchors.bottomMargin: 2
                     spacing: 6
 
-                    TextInput {
+                    TextField {
                         id: taskInput
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
                         color: Theme.text
                         font { pixelSize: 12; family: Theme.fontFamily }
                         placeholderText: "Add a task..."
-                        placeholderTextColor: Theme.dimText
                         verticalAlignment: TextInput.AlignVCenter
+                        background: null
+                        padding: 0
                         onAccepted: {
                             if (text.trim().length > 0) {
                                 win.app.createTask(text.trim())
@@ -191,6 +196,27 @@ Window {
                 Layout.fillWidth: true
                 visible: !win.compactMode && !win.showHistory
                 spacing: 6
+
+                Rectangle {
+                    Layout.preferredWidth: 32
+                    Layout.preferredHeight: 32
+                    radius: 6
+                    color: mouseRefresh.containsMouse ? Theme.accentPressed : Theme.accent
+                    visible: win.app.wsState !== 2 && win.app.online
+                    Text {
+                        anchors.centerIn: parent
+                        text: "↻"
+                        color: Theme.bg
+                        font { pixelSize: 14; weight: Font.Bold; family: Theme.fontFamily }
+                    }
+                    MouseArea {
+                        id: mouseRefresh
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: win.app.forceRefresh()
+                    }
+                }
 
                 Rectangle {
                     Layout.fillWidth: true

@@ -23,10 +23,15 @@ QVariant TaskListModel::data(const QModelIndex& index, int role) const
 
     // Section header for completed
     if (row == activeCount && m_completedTasks.size() > 0) {
-        if (role == TitleRole)
-            return QStringLiteral("COMPLETED %1").arg(m_completedTasks.size());
-        if (role == StatusRole)
-            return QStringLiteral("section-completed");
+        switch (role) {
+        case TitleRole:     return QStringLiteral("COMPLETED %1").arg(m_completedTasks.size());
+        case StatusRole:    return QStringLiteral("section-completed");
+        case IdRole:        return -1;
+        case CompletedRole: return false;
+        case PhaseIdRole:   return QString{};
+        case PhaseNameRole: return QString{};
+        case SortOrderRole: return 0;
+        }
         return {};
     }
 
