@@ -20,6 +20,7 @@ struct FocusTimerControllerQmlForeign {
 
 class AppController : public QObject {
     Q_OBJECT
+    Q_DISABLE_COPY_MOVE(AppController)
     QML_ELEMENT
     QML_UNCREATABLE("AppController is provided by the application")
     Q_PROPERTY(QString currentTaskTitle READ currentTaskTitle NOTIFY currentTaskChanged)
@@ -28,9 +29,9 @@ class AppController : public QObject {
     Q_PROPERTY(FocusTimerController* focusTimer READ focusTimer CONSTANT)
 
 public:
-    explicit AppController(TaskService* taskService,
-                           TaskListModel* taskListModel,
-                           FocusTimerController* focusTimer,
+    explicit AppController(TaskService& taskService,
+                           TaskListModel& taskListModel,
+                           FocusTimerController& focusTimer,
                            QObject* parent = nullptr);
 
     QString currentTaskTitle() const;
@@ -46,8 +47,8 @@ signals:
     void currentTaskChanged();
 
 private:
-    TaskService* m_taskService;
-    TaskListModel* m_taskListModel;
-    FocusTimerController* m_focusTimer;
+    TaskService& m_taskService;
+    TaskListModel& m_taskListModel;
+    FocusTimerController& m_focusTimer;
     int m_currentTaskId = -1;
 };

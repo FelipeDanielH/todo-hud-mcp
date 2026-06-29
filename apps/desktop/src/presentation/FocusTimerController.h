@@ -4,6 +4,7 @@
 
 class FocusTimerController : public QObject {
     Q_OBJECT
+    Q_DISABLE_COPY_MOVE(FocusTimerController)
     Q_PROPERTY(QString formattedTime READ formattedTime NOTIFY formattedTimeChanged)
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY isRunningChanged)
 
@@ -25,7 +26,7 @@ signals:
 private:
     void tick();
 
-    QTimer* m_timer;
+    QTimer m_timer;
     int m_remainingSeconds = 0;
 
     static constexpr int FOCUS_DURATION_SECONDS = 25 * 60;

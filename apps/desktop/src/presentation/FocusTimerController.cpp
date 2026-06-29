@@ -2,9 +2,8 @@
 
 FocusTimerController::FocusTimerController(QObject* parent)
     : QObject(parent)
-    , m_timer(new QTimer(this))
 {
-    connect(m_timer, &QTimer::timeout, this, &FocusTimerController::tick);
+    connect(&m_timer, &QTimer::timeout, this, &FocusTimerController::tick);
     reset();
 }
 
@@ -15,7 +14,7 @@ QString FocusTimerController::formattedTime() const
 
 bool FocusTimerController::isRunning() const
 {
-    return m_timer->isActive();
+    return m_timer.isActive();
 }
 
 void FocusTimerController::start()
@@ -26,7 +25,7 @@ void FocusTimerController::start()
     if (m_remainingSeconds == 0)
         m_remainingSeconds = FOCUS_DURATION_SECONDS;
 
-    m_timer->start(1000);
+    m_timer.start(1000);
     emit isRunningChanged();
     emit formattedTimeChanged();
 }
@@ -36,7 +35,7 @@ void FocusTimerController::stop()
     if (!isRunning())
         return;
 
-    m_timer->stop();
+    m_timer.stop();
     emit isRunningChanged();
 }
 
@@ -44,7 +43,7 @@ void FocusTimerController::reset()
 {
     const bool wasRunning = isRunning();
     if (wasRunning)
-        m_timer->stop();
+        m_timer.stop();
 
     m_remainingSeconds = FOCUS_DURATION_SECONDS;
     emit formattedTimeChanged();
@@ -61,7 +60,7 @@ void FocusTimerController::tick()
     }
 
     if (m_remainingSeconds == 0) {
-        m_timer->stop();
+        m_timer.stop();
         emit isRunningChanged();
         emit focusCompleted();
     }

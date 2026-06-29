@@ -15,11 +15,12 @@ int main(int argc, char* argv[])
     app.setApplicationVersion(QStringLiteral("0.1.0"));
     QQuickStyle::setStyle(QStringLiteral("Basic"));
 
+    // Composition root: stack-owned services/controllers outlive the QML engine.
     InMemoryTaskRepository repository;
-    TaskService taskService(&repository);
-    TaskListModel taskListModel(&taskService);
+    TaskService taskService(repository);
+    TaskListModel taskListModel(taskService);
     FocusTimerController focusTimer;
-    AppController appController(&taskService, &taskListModel, &focusTimer);
+    AppController appController(taskService, taskListModel, focusTimer);
 
     QQmlApplicationEngine engine;
     engine.setInitialProperties({

@@ -3,7 +3,7 @@
 
 class TaskService {
 public:
-    explicit TaskService(TaskRepository* repository);
+    explicit TaskService(TaskRepository& repository);
 
     QVector<Task> allTasks() const;
     Task getTask(int id) const;
@@ -11,5 +11,5 @@ public:
     void reopenTask(int id);
 
 private:
-    TaskRepository* m_repository;
+    TaskRepository& m_repository;
 };

@@ -1,7 +1,7 @@
 #include "TaskListModel.h"
 #include "application/TaskService.h"
 
-TaskListModel::TaskListModel(TaskService* service, QObject* parent)
+TaskListModel::TaskListModel(TaskService& service, QObject* parent)
     : QAbstractListModel(parent)
     , m_service(service)
 {
@@ -44,6 +44,6 @@ QHash<int, QByteArray> TaskListModel::roleNames() const
 void TaskListModel::refresh()
 {
     beginResetModel();
-    m_tasks = m_service->allTasks();
+    m_tasks = m_service.allTasks();
     endResetModel();
 }
