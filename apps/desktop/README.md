@@ -96,3 +96,27 @@ Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR)
 ```
 
 This does not block the current Qt Quick desktop build.
+
+## Pre-Merge Checklist
+
+From the repo root:
+
+```powershell
+git status --short
+```
+
+From `apps/desktop`:
+
+```powershell
+cmake --preset windows-mingw
+cmake --build --preset windows-mingw
+cmake --build build --target FocusHud_qmllint
+.\build\FocusHud.exe
+```
+
+From `apps/api`:
+
+```powershell
+npm run build
+npm test
+```
