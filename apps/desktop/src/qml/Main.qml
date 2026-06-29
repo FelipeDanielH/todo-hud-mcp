@@ -103,5 +103,21 @@ Window {
                 onClicked: Qt.quit()
             }
         }
+
+        MouseArea {
+            id: dragArea
+            height: 42
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                leftMargin: 10
+                rightMargin: 76
+                topMargin: 8
+            }
+            acceptedButtons: Qt.LeftButton
+            cursorShape: Qt.SizeAllCursor
+            onPressed: win.startSystemMove()
+        }
     }
 }
