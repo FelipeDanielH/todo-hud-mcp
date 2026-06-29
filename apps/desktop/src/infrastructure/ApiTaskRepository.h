@@ -1,14 +1,11 @@
-// @tech-debt ApiTaskRepository uses synchronous (blocking) HTTP calls via QEventLoop.
-// Future improvement: migrate to async QNetworkReply + signal/slot or
-// QtConcurrent to avoid blocking the UI thread during GET /tasks refresh from WebSocket events.
-
 #pragma once
 #include <QString>
 #include <QVector>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QNetworkAccessManager>
 #include "application/TaskRepository.h"
+
+class QNetworkReply;
 
 class ApiTaskRepository : public TaskRepository {
 public:
@@ -23,13 +20,14 @@ public:
     void save(const Task& task) override;
     QVector<Task> archived() const override;
 
-    QJsonObject archiveCompleted(const QString& phaseId = {});
-    QJsonObject createBatch(const QString& phaseName, const QStringList& titles);
+    ArchiveTasksResult archiveCompletedTasks(const QString& phaseId = {}) override;
+    BatchCreateResult createBatch(const QString& phaseName, const QStringList& titles) override;
 
 private:
     Task parseTask(const QJsonObject& obj, int rowId) const;
     int findIdByApiId(const QString& apiId) const;
     void checkConnection();
+    bool waitForReply(QNetworkReply* reply, const QString& operation) const;
 
     QJsonObject doGet(const QString& path) const;
     QJsonObject doPost(const QString& path, const QJsonObject& body);
@@ -38,4 +36,6 @@ private:
     mutable QNetworkAccessManager m_manager;
     QString m_baseUrl;
     mutable bool m_connected = false;
+
+    static constexpr int NETWORK_TIMEOUT_MS = 5000;
 };

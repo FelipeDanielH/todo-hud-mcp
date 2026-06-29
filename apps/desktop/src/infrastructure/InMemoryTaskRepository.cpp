@@ -1,6 +1,4 @@
 #include <QDateTime>
-#include <QJsonObject>
-#include <QJsonArray>
 #include "InMemoryTaskRepository.h"
 
 InMemoryTaskRepository::InMemoryTaskRepository()
@@ -61,7 +59,7 @@ QVector<Task> InMemoryTaskRepository::archived() const
     return result;
 }
 
-QJsonObject InMemoryTaskRepository::archiveCompletedTasks(const QString& phaseId)
+ArchiveTasksResult InMemoryTaskRepository::archiveCompletedTasks(const QString& phaseId)
 {
     const auto now = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
     int count = 0;
@@ -74,19 +72,25 @@ QJsonObject InMemoryTaskRepository::archiveCompletedTasks(const QString& phaseId
             ++count;
         }
     }
-    QJsonObject result;
-    result[QStringLiteral("archived")] = count;
-    result[QStringLiteral("archivedAt")] = now;
+    ArchiveTasksResult result;
+    result.archived = count;
+    result.archivedAt = now;
     return result;
 }
 
-QJsonObject InMemoryTaskRepository::createBatch(const QString& phaseName, const QStringList& titles)
+BatchCreateResult InMemoryTaskRepository::createBatch(const QString& phaseName, const QStringList& titles)
 {
     const QString phaseId = QStringLiteral("local-") + QString::number(QDateTime::currentMSecsSinceEpoch());
-    QJsonArray tasksArr;
+    int nextId = 1;
+    for (const auto& existing : m_tasks) {
+        if (existing.id >= nextId)
+            nextId = existing.id + 1;
+    }
+
+    QVector<Task> created;
     for (int i = 0; i < titles.size(); ++i) {
         Task task;
-        task.id = m_tasks.size() + i + 1;
+        task.id = nextId++;
         task.title = titles[i];
         task.completed = false;
         task.status = QStringLiteral("pending");
@@ -94,15 +98,11 @@ QJsonObject InMemoryTaskRepository::createBatch(const QString& phaseName, const 
         task.phaseName = phaseName;
         task.sortOrder = i;
         m_tasks.append(task);
-        QJsonObject taskObj;
-        taskObj[QStringLiteral("id")] = QString::number(task.id);
-        taskObj[QStringLiteral("title")] = task.title;
-        taskObj[QStringLiteral("status")] = task.status;
-        tasksArr.append(taskObj);
+        created.append(task);
     }
-    QJsonObject result;
-    result[QStringLiteral("phaseId")] = phaseId;
-    result[QStringLiteral("phaseName")] = phaseName;
-    result[QStringLiteral("tasks")] = tasksArr;
+    BatchCreateResult result;
+    result.phaseId = phaseId;
+    result.phaseName = phaseName;
+    result.tasks = created;
     return result;
 }

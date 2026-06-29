@@ -1,5 +1,4 @@
 #include <QDateTime>
-#include <QJsonObject>
 #include "TaskService.h"
 
 TaskService::TaskService(TaskRepository& repository)
@@ -49,6 +48,9 @@ Task TaskService::getTask(int id) const
 void TaskService::completeTask(int id)
 {
     Task task = m_repository.getById(id);
+    if (task.id < 0)
+        return;
+
     task.completed = true;
     task.status = QStringLiteral("completed");
     task.completedAt = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
@@ -58,6 +60,9 @@ void TaskService::completeTask(int id)
 void TaskService::reopenTask(int id)
 {
     Task task = m_repository.getById(id);
+    if (task.id < 0)
+        return;
+
     task.completed = false;
     task.status = QStringLiteral("pending");
     task.completedAt.clear();
@@ -77,49 +82,14 @@ void TaskService::createTask(const QString& title, const QString& phaseId, const
     m_repository.save(task);
 }
 
-QJsonObject TaskService::archiveCompleted(const QString& phaseId)
+ArchiveTasksResult TaskService::archiveCompleted(const QString& phaseId)
 {
-    QJsonObject result = m_repository.archiveCompletedTasks(phaseId);
-    if (result.isEmpty()) {
-        const auto now = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
-        int count = 0;
-        for (const auto& t : m_repository.all()) {
-            if (t.status == QStringLiteral("completed")) {
-                if (!phaseId.isEmpty() && t.phaseId != phaseId)
-                    continue;
-                Task archived = t;
-                archived.status = QStringLiteral("archived");
-                archived.archivedAt = now;
-                m_repository.update(archived);
-                ++count;
-            }
-        }
-        result[QStringLiteral("archived")] = count;
-        result[QStringLiteral("archivedAt")] = now;
-    }
-    return result;
+    return m_repository.archiveCompletedTasks(phaseId);
 }
 
-QJsonObject TaskService::createBatch(const QString& phaseName, const QStringList& titles)
+BatchCreateResult TaskService::createBatch(const QString& phaseName, const QStringList& titles)
 {
-    QJsonObject result = m_repository.createBatch(phaseName, titles);
-    if (result.isEmpty()) {
-        const QString phaseId = QStringLiteral("local-") + QString::number(QDateTime::currentMSecsSinceEpoch());
-        for (int i = 0; i < titles.size(); ++i) {
-            Task task;
-            task.id = m_nextId++;
-            task.title = titles[i];
-            task.completed = false;
-            task.status = QStringLiteral("pending");
-            task.phaseId = phaseId;
-            task.phaseName = phaseName;
-            task.sortOrder = i;
-            m_repository.save(task);
-        }
-        result[QStringLiteral("phaseId")] = phaseId;
-        result[QStringLiteral("phaseName")] = phaseName;
-    }
-    return result;
+    return m_repository.createBatch(phaseName, titles);
 }
 
 int TaskService::completedCount() const
@@ -131,5 +101,3 @@ int TaskService::completedCount() const
     }
     return count;
 }
-
-

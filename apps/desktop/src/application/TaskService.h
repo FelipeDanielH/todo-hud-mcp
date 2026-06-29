@@ -1,6 +1,5 @@
 #pragma once
 #include <QVector>
-#include <QJsonObject>
 #include "domain/Task.h"
 #include "application/TaskRepository.h"
 
@@ -16,8 +15,8 @@ public:
     void completeTask(int id);
     void reopenTask(int id);
     void createTask(const QString& title, const QString& phaseId = {}, const QString& phaseName = {});
-    QJsonObject archiveCompleted(const QString& phaseId = {});
-    QJsonObject createBatch(const QString& phaseName, const QStringList& titles);
+    ArchiveTasksResult archiveCompleted(const QString& phaseId = {});
+    BatchCreateResult createBatch(const QString& phaseName, const QStringList& titles);
     int completedCount() const;
 
 

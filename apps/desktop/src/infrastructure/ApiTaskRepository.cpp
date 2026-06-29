@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QDebug>
+#include <QTimer>
 #include "ApiTaskRepository.h"
 
 ApiTaskRepository::ApiTaskRepository(const QString& baseUrl)
@@ -33,18 +34,42 @@ void ApiTaskRepository::checkConnection()
         .arg(m_baseUrl, m_connected ? QStringLiteral("connected") : QStringLiteral("NOT REACHABLE - fallback will be used"));
 }
 
+bool ApiTaskRepository::waitForReply(QNetworkReply* reply, const QString& operation) const
+{
+    QEventLoop loop;
+    QTimer timeout;
+    bool timedOut = false;
+
+    timeout.setSingleShot(true);
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    QObject::connect(&timeout, &QTimer::timeout, &loop, [&]() {
+        timedOut = true;
+        qWarning().noquote() << QStringLiteral("[ApiTaskRepository] %1 timed out after %2ms")
+            .arg(operation)
+            .arg(NETWORK_TIMEOUT_MS);
+        reply->abort();
+        loop.quit();
+    });
+
+    timeout.start(NETWORK_TIMEOUT_MS);
+    loop.exec();
+
+    if (timeout.isActive())
+        timeout.stop();
+
+    return !timedOut;
+}
+
 QJsonObject ApiTaskRepository::doGet(const QString& path) const
 {
     QNetworkRequest req(QUrl(m_baseUrl + path));
     req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
 
     QNetworkReply* reply = m_manager.get(req);
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
+    const bool completed = waitForReply(reply, QStringLiteral("GET %1").arg(path));
 
     QJsonObject result;
-    if (reply->error() == QNetworkReply::NoError) {
+    if (completed && reply->error() == QNetworkReply::NoError) {
         const auto data = reply->readAll();
         const auto doc = QJsonDocument::fromJson(data);
         if (doc.isObject())
@@ -66,12 +91,10 @@ QJsonObject ApiTaskRepository::doPost(const QString& path, const QJsonObject& bo
 
     const QByteArray payload = QJsonDocument(body).toJson(QJsonDocument::Compact);
     QNetworkReply* reply = m_manager.post(req, payload);
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
+    const bool completed = waitForReply(reply, QStringLiteral("POST %1").arg(path));
 
     QJsonObject result;
-    if (reply->error() == QNetworkReply::NoError) {
+    if (completed && reply->error() == QNetworkReply::NoError) {
         const auto data = reply->readAll();
         const auto doc = QJsonDocument::fromJson(data);
         if (doc.isObject())
@@ -93,12 +116,10 @@ QJsonObject ApiTaskRepository::doPatch(const QString& path, const QJsonObject& b
 
     const QByteArray payload = QJsonDocument(body).toJson(QJsonDocument::Compact);
     QNetworkReply* reply = m_manager.sendCustomRequest(req, "PATCH", payload);
-    QEventLoop loop;
-    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    loop.exec();
+    const bool completed = waitForReply(reply, QStringLiteral("PATCH %1").arg(path));
 
     QJsonObject result;
-    if (reply->error() == QNetworkReply::NoError) {
+    if (completed && reply->error() == QNetworkReply::NoError) {
         const auto data = reply->readAll();
         const auto doc = QJsonDocument::fromJson(data);
         if (doc.isObject())
@@ -205,15 +226,26 @@ QVector<Task> ApiTaskRepository::archived() const
     return result;
 }
 
-QJsonObject ApiTaskRepository::archiveCompleted(const QString& phaseId)
+ArchiveTasksResult ApiTaskRepository::archiveCompletedTasks(const QString& phaseId)
 {
     QJsonObject body;
     if (!phaseId.isEmpty())
         body[QStringLiteral("phaseId")] = phaseId;
-    return doPost(QStringLiteral("tasks/archive"), body);
+    const auto json = doPost(QStringLiteral("tasks/archive"), body);
+
+    ArchiveTasksResult result;
+    if (json.isEmpty()) {
+        result.ok = false;
+        result.error = QStringLiteral("Archive request failed");
+        return result;
+    }
+
+    result.archived = json[QStringLiteral("archived")].toInt();
+    result.archivedAt = json[QStringLiteral("archivedAt")].toString();
+    return result;
 }
 
-QJsonObject ApiTaskRepository::createBatch(const QString& phaseName, const QStringList& titles)
+BatchCreateResult ApiTaskRepository::createBatch(const QString& phaseName, const QStringList& titles)
 {
     QJsonObject body;
     body[QStringLiteral("phaseName")] = phaseName;
@@ -221,5 +253,20 @@ QJsonObject ApiTaskRepository::createBatch(const QString& phaseName, const QStri
     for (const auto& t : titles)
         arr.append(t);
     body[QStringLiteral("tasks")] = arr;
-    return doPost(QStringLiteral("tasks/batch"), body);
+
+    const auto json = doPost(QStringLiteral("tasks/batch"), body);
+
+    BatchCreateResult result;
+    if (json.isEmpty()) {
+        result.ok = false;
+        result.error = QStringLiteral("Batch creation request failed");
+        return result;
+    }
+
+    result.phaseId = json[QStringLiteral("phaseId")].toString();
+    result.phaseName = json[QStringLiteral("phaseName")].toString();
+    const auto tasks = json[QStringLiteral("tasks")].toArray();
+    for (int i = 0; i < tasks.size(); ++i)
+        result.tasks.append(parseTask(tasks[i].toObject(), i));
+    return result;
 }

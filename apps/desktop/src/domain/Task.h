@@ -2,7 +2,7 @@
 #include <QString>
 
 struct Task {
-    int id = 0;
+    int id = -1;
     QString apiId;
     QString title;
     bool completed = false;

@@ -1,7 +1,22 @@
 #pragma once
 #include <QVector>
-#include <QJsonObject>
+#include <QStringList>
 #include "domain/Task.h"
+
+struct ArchiveTasksResult {
+    int archived = 0;
+    QString archivedAt;
+    bool ok = true;
+    QString error;
+};
+
+struct BatchCreateResult {
+    QString phaseId;
+    QString phaseName;
+    QVector<Task> tasks;
+    bool ok = true;
+    QString error;
+};
 
 class TaskRepository {
 public:
@@ -12,6 +27,6 @@ public:
     virtual void save(const Task& task) = 0;
     virtual QVector<Task> archived() const = 0;
 
-    virtual QJsonObject archiveCompletedTasks(const QString& /*phaseId*/ = {}) { return {}; }
-    virtual QJsonObject createBatch(const QString& /*phaseName*/, const QStringList& /*titles*/) { return {}; }
+    virtual ArchiveTasksResult archiveCompletedTasks(const QString& phaseId = {}) = 0;
+    virtual BatchCreateResult createBatch(const QString& phaseName, const QStringList& titles) = 0;
 };
