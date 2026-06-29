@@ -33,6 +33,11 @@ target_include_directories(FocusHud PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation
 )
 
+target_compile_options(FocusHud PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
+)
+
 qt_add_qml_module(FocusHud
     URI FocusHUD
     VERSION 0.1
