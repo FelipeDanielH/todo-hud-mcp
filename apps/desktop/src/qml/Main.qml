@@ -83,14 +83,7 @@ Window {
 
                     delegate: TaskItem {
                         width: parent.width
-                        title: model.title
-                        completed: model.completed
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: app.selectTask(model.taskId)
-                        }
+                        onSelected: function(taskId) { app.selectTask(taskId) }
                     }
                 }
             }

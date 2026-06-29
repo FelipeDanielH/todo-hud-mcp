@@ -4,8 +4,11 @@ import FocusHUD
 Row {
     id: root
 
+    required property int taskId
     required property string title
-    property bool completed: false
+    required property bool completed
+
+    signal selected(int taskId)
 
     spacing: 10
     height: 28
@@ -25,5 +28,11 @@ Row {
         width: parent.parent.width - 20
         opacity: root.completed ? 0.6 : 1.0
         anchors.verticalCenter: parent.verticalCenter
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.selected(root.taskId)
     }
 }
