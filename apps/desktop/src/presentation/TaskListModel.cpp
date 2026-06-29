@@ -10,7 +10,11 @@ TaskListModel::TaskListModel(TaskService& service, QObject* parent)
 
 int TaskListModel::rowCount(const QModelIndex& parent) const
 {
-    return parent.isValid() ? 0 : m_activeTasks.size() + m_completedTasks.size() + 1;
+    if (parent.isValid())
+        return 0;
+
+    const int completedHeader = m_completedTasks.isEmpty() ? 0 : 1;
+    return m_activeTasks.size() + m_completedTasks.size() + completedHeader;
 }
 
 QVariant TaskListModel::data(const QModelIndex& index, int role) const
@@ -38,7 +42,7 @@ QVariant TaskListModel::data(const QModelIndex& index, int role) const
     const Task* task = nullptr;
     if (row < activeCount) {
         task = &m_activeTasks.at(row);
-    } else if (row > activeCount) {
+    } else if (!m_completedTasks.isEmpty() && row > activeCount) {
         task = &m_completedTasks.at(row - activeCount - 1);
     }
 

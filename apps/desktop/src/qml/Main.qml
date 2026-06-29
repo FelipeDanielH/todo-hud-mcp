@@ -14,20 +14,22 @@ Window {
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     color: "transparent"
 
+    readonly property int expandedHeight: 500
+    readonly property int compactHeight: 64
     property bool compactMode: false
     property bool showHistory: false
-    height: win.compactMode ? 64 : 500
+    property real expandedY: y
+    height: win.compactMode ? win.compactHeight : win.expandedHeight
 
     Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
     Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
 
     onCompactModeChanged: {
         if (win.compactMode) {
-            win.y += win.height - 64
-            win.height = 64
+            win.expandedY = win.y
+            win.y = win.expandedY + win.expandedHeight - win.compactHeight
         } else {
-            win.height = 500
-            win.y -= 500 - 64
+            win.y = win.expandedY
         }
     }
 
