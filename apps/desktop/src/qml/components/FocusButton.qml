@@ -9,7 +9,6 @@ Button {
 
     width: parent ? parent.width : 0
     height: 44
-    radius: Theme.radius
 
     background: Rectangle {
         radius: Theme.radius
