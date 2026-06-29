@@ -56,52 +56,52 @@ Window {
             anchors.margins: Theme.padding
             spacing: Theme.spacing
 
-            HudCard {
-                id: activeCard
-                Layout.fillWidth: true
-                Layout.preferredHeight: 210
-                header: "Focus HUD"
-                badge: "MCP"
-
-                Text {
-                    Layout.fillWidth: true
-                    text: "Ahora"
-                    color: Theme.dimText
-                    font { pixelSize: 11; letterSpacing: 2; family: Theme.fontFamily }
-                }
-
-                Text {
-                    id: activeTaskLabel
-                    Layout.fillWidth: true
-                    text: win.app.hasActiveTask
-                          ? win.app.currentTaskTitle
-                          : "Sin tarea activa"
-                    color: win.app.hasActiveTask ? Theme.text : Theme.dimText
-                    font { pixelSize: 15; weight: Font.DemiBold; family: Theme.fontFamily }
-                    elide: Text.ElideRight
-                }
-
-                Text {
-                    id: timerDisplay
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignHCenter
-                    text: win.app.focusTimer.formattedTime
-                    color: Theme.text
-                    font { pixelSize: 46; weight: Font.Light; family: Theme.fontFamily }
-                }
-
-                FocusButton {
-                    id: focusBtn
-                    Layout.fillWidth: true
-                    label: win.app.focusTimer.isRunning ? "Detener foco" : "Iniciar foco"
-                    onClicked: {
-                        if (win.app.focusTimer.isRunning)
-                            win.app.focusTimer.stop()
-                        else
-                            win.app.focusTimer.start()
-                    }
-                }
-            }
+            // HudCard {
+            //     id: activeCard
+            //     Layout.fillWidth: true
+            //     Layout.preferredHeight: 210
+            //     header: "Focus HUD"
+            //     badge: "MCP"
+            //
+            //     Text {
+            //         Layout.fillWidth: true
+            //         text: "Ahora"
+            //         color: Theme.dimText
+            //         font { pixelSize: 11; letterSpacing: 2; family: Theme.fontFamily }
+            //     }
+            //
+            //     Text {
+            //         id: activeTaskLabel
+            //         Layout.fillWidth: true
+            //         text: win.app.hasActiveTask
+            //               ? win.app.currentTaskTitle
+            //               : "Sin tarea activa"
+            //         color: win.app.hasActiveTask ? Theme.text : Theme.dimText
+            //         font { pixelSize: 15; weight: Font.DemiBold; family: Theme.fontFamily }
+            //         elide: Text.ElideRight
+            //     }
+            //
+            //     Text {
+            //         id: timerDisplay
+            //         Layout.fillWidth: true
+            //         horizontalAlignment: Text.AlignHCenter
+            //         text: win.app.focusTimer.formattedTime
+            //         color: Theme.text
+            //         font { pixelSize: 46; weight: Font.Light; family: Theme.fontFamily }
+            //     }
+            //
+            //     FocusButton {
+            //         id: focusBtn
+            //         Layout.fillWidth: true
+            //         label: win.app.focusTimer.isRunning ? "Detener foco" : "Iniciar foco"
+            //         onClicked: {
+            //             if (win.app.focusTimer.isRunning)
+            //                 win.app.focusTimer.stop()
+            //             else
+            //                 win.app.focusTimer.start()
+            //         }
+            //     }
+            // }
 
             HudCard {
                 id: listCard
