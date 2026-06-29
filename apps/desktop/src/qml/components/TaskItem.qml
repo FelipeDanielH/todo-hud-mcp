@@ -1,12 +1,14 @@
 import QtQuick
+import FocusHUD
 
 Row {
     id: root
 
-    property alias taskTitle: label.text
+    required property string title
     property bool completed: false
 
     spacing: 10
+    height: 28
 
     Rectangle {
         width: 10; height: 10
@@ -16,11 +18,12 @@ Row {
     }
 
     Text {
-        id: label
+        text: root.title
         color: root.completed ? Theme.dimText : Theme.text
         font { pixelSize: 13; family: Theme.family }
         elide: Text.ElideRight
         width: parent.parent.width - 20
         opacity: root.completed ? 0.6 : 1.0
+        anchors.verticalCenter: parent.verticalCenter
     }
 }

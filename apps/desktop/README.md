@@ -5,7 +5,7 @@ Qt 6 / QML desktop frontend for Focus HUD.
 ## Prerequisites
 
 - CMake ≥ 3.16
-- Qt 6 (Quick, QuickControls2)
+- Qt ≥ 6.2 (Core, Gui, Qml, Quick, QuickControls2)
 - C++17 compiler
 
 ### Windows (Chocolatey)
@@ -42,40 +42,72 @@ cmake -B build -DCMAKE_PREFIX_PATH="C:/Qt/6.8.0/msvc2022_64"
 cmake --build build
 ```
 
-## Architecture (SOLID)
+QML is bundled into the binary via `qt_add_qml_module()`. No runtime file paths required.
+
+## Architecture (SOLID, hexagonal)
 
 ```
 src/
-├── main.cpp                   # Entry point, engine setup
-├── app/
-│   ├── TaskModel.h/.cpp       # Data layer — QAbstractListModel with mock tasks
-│   └── TaskController.h/.cpp  # Controller — timer logic, task actions, exposes state to QML
+├── main.cpp                          # Composition root (wire DI, start engine)
+├── domain/
+│   └── Task.h                        # Pure data struct (no QObject, no Qt Quick)
+├── application/
+│   ├── TaskRepository.h              # Port interface (abstract)
+│   └── TaskService.h/.cpp            # Use case orchestration
+├── infrastructure/
+│   └── InMemoryTaskRepository.h/.cpp # Adapter (mock data, swappable)
+├── presentation/
+│   ├── AppController.h/.cpp          # Facade for QML (Q_PROPERTY, Q_INVOKABLE)
+│   ├── TaskListModel.h/.cpp          # QAbstractListModel (roles: id, title, completed, statusText)
+│   └── FocusTimerController.h/.cpp   # 25 min countdown timer
 └── qml/
-    ├── Main.qml               # Root view (HUD window)
+    ├── Main.qml                      # Root HUD window (FocusHUD module)
     ├── components/
-    │   ├── HudCard.qml        # Reusable dark card container
-    │   ├── TaskItem.qml       # Single task row (title + status indicator)
-    │   └── FocusButton.qml    # Primary action button
+    │   ├── HudCard.qml               # Reusable dark card container
+    │   ├── TaskItem.qml              # Single task row
+    │   └── FocusButton.qml           # Primary action button
     └── theme/
-        └── Theme.qml          # Design tokens (colors, spacing, radius)
+        └── Theme.qml                 # Design tokens (singleton, pragma Singleton)
 ```
+
+### Layer rules
+
+| Layer | Rules |
+|-------|-------|
+| `domain/` | Pure C++ structs. Zero Qt Quick, zero QObject. |
+| `application/` | Interfaces + services. Depends on `domain/` only. Framework-agnostic. |
+| `infrastructure/` | Concrete implementations of ports. Swappable via constructor injection. |
+| `presentation/` | QObject-based, QML-aware. Exposes state via `Q_PROPERTY` + `NOTIFY`. |
+| `qml/` | Presentation only. No business logic, no HTTP calls. Uses `required property`. |
 
 ### SOLID mapping
 
 | Principle | How it's applied |
 |-----------|------------------|
-| **S** — Single Responsibility | `TaskModel` owns data; `TaskController` owns behavior; QML owns presentation |
-| **O** — Open/Closed | Add new views by composing existing components; add new actions via controller slots |
-| **L** — Liskov Substitution | `TaskModel` inherits `QAbstractListModel` — any Qt view can consume it |
-| **I** — Interface Segregation | Controller exposes only the properties/slots QML needs; no fat interfaces |
-| **D** — Dependency Inversion | QML depends on abstractions (`Q_PROPERTY`, signals, slots), not on concrete C++ internals |
+| **S** | `TaskListModel` owns data presentation; `FocusTimerController` owns timer; `AppController` orchestrates. |
+| **O** | Add `HttpTaskRepository` without touching QML; add views by composing components. |
+| **L** | `InMemoryTaskRepository` is a drop-in for any future `TaskRepository` impl. |
+| **I** | Each controller exposes only what QML needs; no fat interfaces. |
+| **D** | `TaskService` depends on `TaskRepository` interface, not on `InMemoryTaskRepository`. |
+
+### Why C++17
+
+Qt 6 itself compiles with C++17. C++20 features (modules, concepts, coroutines) add no value to this codebase and would limit compiler compatibility (MSVC 2019+ vs 2022+).
 
 ## Connecting to the backend (future)
 
-Replace `TaskModel`'s mock data with a `NetworkTaskModel` that fetches from the NestJS API
-or subscribes via the MCP Streamable HTTP endpoint. The QML layer requires zero changes.
+1. Create `infrastructure/HttpTaskRepository` implementing `TaskRepository`
+2. Swap in `main.cpp`: `HttpTaskRepository repo` instead of `InMemoryTaskRepository`
+3. QML layer requires zero changes
+
+## Switching from desktop to backend
+
+- `app.taskListModel` → provides task data for `Repeater` / `ListView`
+- `app.focusTimer` → `.formattedTime`, `.isRunning`, `.start()`, `.stop()`, `.reset()`
+- `app.selectTask(id)` → highlights a task as "current"
+- `app.completeCurrentTask()` → marks task done, advances to next pending task
 
 ## MCP note
 
-The "MCP" badge in the UI header hints at the backend protocol.
-A future iteration could surface connection status and available tools directly in the HUD.
+The "MCP" badge hints at the backend protocol. A future iteration could surface
+connection status and available tools directly in the HUD.

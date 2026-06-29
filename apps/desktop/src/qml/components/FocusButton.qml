@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Controls
+import FocusHUD
 
 Button {
     id: root
 
-    property alias label: btnText.text
+    required property string label
 
-    width: parent.width
+    width: parent ? parent.width : 0
     height: 44
     radius: Theme.radius
 
@@ -16,7 +17,7 @@ Button {
     }
 
     contentItem: Text {
-        id: btnText
+        text: root.label
         anchors.centerIn: parent
         color: "#0f0f1a"
         font { pixelSize: 14; weight: Font.Bold; family: Theme.family }

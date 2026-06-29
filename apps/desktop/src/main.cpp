@@ -1,8 +1,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QQmlContext>
-#include "app/TaskController.h"
-#include "app/TaskModel.h"
+#include "infrastructure/InMemoryTaskRepository.h"
+#include "application/TaskService.h"
+#include "presentation/TaskListModel.h"
+#include "presentation/FocusTimerController.h"
+#include "presentation/AppController.h"
 
 int main(int argc, char* argv[])
 {
@@ -10,14 +12,15 @@ int main(int argc, char* argv[])
     app.setApplicationName(QStringLiteral("Focus HUD"));
     app.setApplicationVersion(QStringLiteral("0.1.0"));
 
-    TaskModel model;
-    TaskController controller(&model);
+    InMemoryTaskRepository repository;
+    TaskService taskService(&repository);
+    TaskListModel taskListModel(&taskService);
+    FocusTimerController focusTimer;
+    AppController appController(&taskService, &taskListModel, &focusTimer);
 
     QQmlApplicationEngine engine;
-    engine.rootContext()->setContextProperty(QStringLiteral("taskController"), &controller);
-
-    const QUrl url(QStringLiteral(SOURCE_DIR) + QStringLiteral("/src/qml/Main.qml"));
-    engine.load(url);
+    engine.rootContext()->setContextProperty(QStringLiteral("app"), &appController);
+    engine.loadFromModule(QStringLiteral("FocusHUD"), QStringLiteral("Main"));
 
     if (engine.rootObjects().isEmpty())
         return -1;

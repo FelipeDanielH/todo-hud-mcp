@@ -1,10 +1,11 @@
 import QtQuick
+import FocusHUD
 
 Rectangle {
     id: root
 
-    property alias header: headerText.text
-    property alias badge: badgeText.text
+    required property string header
+    property string badge: ""
     default property alias content: contentArea.data
 
     color: Theme.card
@@ -21,7 +22,7 @@ Rectangle {
             spacing: 10
 
             Text {
-                id: headerText
+                text: root.header
                 color: Theme.text
                 font { pixelSize: 16; weight: Font.Bold; family: Theme.family }
                 anchors.verticalCenter: parent.verticalCenter
@@ -30,17 +31,18 @@ Rectangle {
             Rectangle {
                 id: badgeRect
                 height: 20
-                width: badgeText.width + 12
+                width: badgeLabel.width + 12
                 radius: 4
                 color: Theme.badge
                 anchors.verticalCenter: parent.verticalCenter
-                visible: badgeText.text.length > 0
+                visible: root.badge.length > 0
 
                 Text {
-                    id: badgeText
+                    id: badgeLabel
                     anchors.centerIn: parent
                     color: "#0f0f1a"
                     font { pixelSize: 10; weight: Font.Bold; family: Theme.family }
+                    text: root.badge
                 }
             }
         }

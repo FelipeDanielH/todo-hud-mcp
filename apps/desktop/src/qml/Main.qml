@@ -1,9 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
-import QtQuick.Layouts
-import "components"
-import "theme"
+import FocusHUD
 
 Window {
     id: win
@@ -41,10 +39,10 @@ Window {
                 Text {
                     id: activeTaskLabel
                     width: parent.width
-                    text: taskController.hasActiveTask
-                          ? taskController.currentTaskTitle
+                    text: app.hasActiveTask
+                          ? app.currentTaskTitle
                           : "Sin tarea activa"
-                    color: taskController.hasActiveTask ? Theme.text : Theme.dimText
+                    color: app.hasActiveTask ? Theme.text : Theme.dimText
                     font { pixelSize: 15; weight: Font.DemiBold; family: Theme.family }
                     elide: Text.ElideRight
                 }
@@ -53,9 +51,7 @@ Window {
                     id: timerDisplay
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
-                    text: taskController.formattedTime.length > 0
-                          ? taskController.formattedTime
-                          : "25:00"
+                    text: app.focusTimer.formattedTime
                     color: Theme.text
                     font { pixelSize: 42; weight: Font.Light; family: Theme.family }
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -63,12 +59,12 @@ Window {
 
                 FocusButton {
                     id: focusBtn
-                    label: taskController.isRunning ? "Detener foco" : "Iniciar foco"
+                    label: app.focusTimer.isRunning ? "Detener foco" : "Iniciar foco"
                     onClicked: {
-                        if (taskController.isRunning)
-                            taskController.stopFocus()
+                        if (app.focusTimer.isRunning)
+                            app.focusTimer.stop()
                         else
-                            taskController.startFocus()
+                            app.focusTimer.start()
                     }
                 }
             }
@@ -83,18 +79,17 @@ Window {
                 badge: ""
 
                 Repeater {
-                    model: taskController.taskModel
+                    model: app.taskListModel
 
                     delegate: TaskItem {
                         width: parent.width
-                        height: 28
-                        taskTitle: model.title
-                        completed: model.status === "completada"
+                        title: model.title
+                        completed: model.completed
 
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: taskController.selectTask(index)
+                            onClicked: app.selectTask(model.taskId)
                         }
                     }
                 }
