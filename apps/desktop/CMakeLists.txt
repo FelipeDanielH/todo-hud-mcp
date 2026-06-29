@@ -29,6 +29,10 @@ qt_add_executable(FocusHud
     src/presentation/FocusTimerController.h
 )
 
+if(WIN32)
+    set_target_properties(FocusHud PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
+
 set_source_files_properties(src/qml/theme/Theme.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
 )
@@ -64,3 +68,7 @@ target_link_libraries(FocusHud PRIVATE
     Qt6::Network
     Qt6::WebSockets
 )
+
+if(WIN32)
+    target_link_libraries(FocusHud PRIVATE user32)
+endif()

@@ -1,6 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Controls
 import FocusHUD
 
 Rectangle {
@@ -8,68 +6,59 @@ Rectangle {
 
     signal close()
 
-    color: Theme.card
-    radius: Theme.radius
-    border { color: Theme.border; width: 1 }
+    color: Theme.panelDeep
+    radius: 10
+    border { color: Theme.borderSoft; width: 1 }
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: Theme.padding
-        spacing: Theme.spacing
+    Text {
+        x: 20
+        y: 18
+        text: "Historial"
+        color: Theme.text
+        font { pixelSize: 17; weight: Font.Bold; family: Theme.fontFamily }
+    }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 10
+    Rectangle {
+        anchors {
+            top: parent.top
+            right: parent.right
+            topMargin: 13
+            rightMargin: 13
+        }
+        width: 32
+        height: 32
+        radius: 8
+        color: closeMouse.containsMouse ? Theme.cardHover : Theme.panel
+        border { color: Theme.borderSoft; width: 1 }
 
-            Text {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
-                text: "Archive"
-                color: Theme.text
-                font { pixelSize: 15; weight: Font.Bold; family: Theme.fontFamily }
-            }
-
-            Rectangle {
-                Layout.preferredWidth: 26
-                Layout.preferredHeight: 24
-                radius: 6
-                color: mouseClose.containsMouse ? Theme.pending : "transparent"
-                Layout.alignment: Qt.AlignVCenter
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "←"
-                    color: Theme.text
-                    font { pixelSize: 13; weight: Font.Bold; family: Theme.fontFamily }
-                }
-
-                MouseArea {
-                    id: mouseClose
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-                    onClicked: root.close()
-                }
-            }
+        Text {
+            anchors.centerIn: parent
+            text: "<"
+            color: Theme.text
+            font { pixelSize: 15; weight: Font.Bold; family: Theme.fontFamily }
         }
 
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 1
-            color: Theme.border
+        MouseArea {
+            id: closeMouse
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onClicked: root.close()
         }
+    }
 
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+    Rectangle {
+        x: 20
+        y: 59
+        width: parent.width - 40
+        height: 1
+        color: Theme.borderSoft
+    }
 
-            Text {
-                anchors.centerIn: parent
-                text: "No archived phases yet."
-                color: Theme.dimText
-                font { pixelSize: 12; family: Theme.fontFamily }
-                visible: true
-            }
-        }
+    Text {
+        anchors.centerIn: parent
+        text: "No hay tareas archivadas todavía."
+        color: Theme.mutedText
+        font { pixelSize: 12; family: Theme.fontFamily }
     }
 }
