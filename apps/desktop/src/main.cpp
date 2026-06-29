@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include "infrastructure/InMemoryTaskRepository.h"
 #include "application/TaskService.h"
 #include "presentation/TaskListModel.h"
