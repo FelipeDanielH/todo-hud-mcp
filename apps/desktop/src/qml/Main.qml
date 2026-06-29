@@ -11,6 +11,34 @@ Window {
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     color: "transparent"
 
+    component WindowControl: Rectangle {
+        id: control
+
+        required property string label
+        property color hoverColor: Theme.border
+        signal clicked()
+
+        Layout.preferredWidth: 26
+        Layout.preferredHeight: 24
+        radius: 6
+        color: mouse.containsMouse ? control.hoverColor : "transparent"
+
+        Text {
+            anchors.centerIn: parent
+            text: control.label
+            color: Theme.text
+            font { pixelSize: 13; weight: Font.Bold; family: Theme.fontFamily }
+        }
+
+        MouseArea {
+            id: mouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: control.clicked()
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         anchors.margins: 8
@@ -91,19 +119,6 @@ Window {
             }
         }
 
-        Rectangle {
-            id: closeBtn
-            width: 12; height: 12
-            radius: 6
-            color: "#ff6b6b"
-            anchors { top: parent.top; right: parent.right; margins: 10 }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: Qt.quit()
-            }
-        }
-
         MouseArea {
             id: dragArea
             height: 42
@@ -118,6 +133,29 @@ Window {
             acceptedButtons: Qt.LeftButton
             cursorShape: Qt.SizeAllCursor
             onPressed: win.startSystemMove()
+        }
+
+        RowLayout {
+            id: windowControls
+            height: 24
+            spacing: 4
+            anchors {
+                top: parent.top
+                right: parent.right
+                topMargin: 10
+                rightMargin: 10
+            }
+
+            WindowControl {
+                label: "-"
+                onClicked: win.showMinimized()
+            }
+
+            WindowControl {
+                label: "X"
+                hoverColor: Theme.pending
+                onClicked: win.close()
+            }
         }
     }
 }
