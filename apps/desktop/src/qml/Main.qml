@@ -5,8 +5,8 @@ import FocusHUD
 
 Window {
     id: win
-    width: 360
-    height: 520
+    width: 348
+    height: 500
     visible: true
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     color: "transparent"
@@ -44,6 +44,7 @@ Window {
         anchors.margins: 8
         color: Theme.bg
         radius: Theme.radius
+        border { color: Theme.border; width: 1 }
 
         ColumnLayout {
             anchors.fill: parent
@@ -53,7 +54,7 @@ Window {
             HudCard {
                 id: activeCard
                 Layout.fillWidth: true
-                Layout.preferredHeight: 220
+                Layout.preferredHeight: 210
                 header: "Focus HUD"
                 badge: "MCP"
 
@@ -81,7 +82,7 @@ Window {
                     horizontalAlignment: Text.AlignHCenter
                     text: app.focusTimer.formattedTime
                     color: Theme.text
-                    font { pixelSize: 42; weight: Font.Light; family: Theme.fontFamily }
+                    font { pixelSize: 46; weight: Font.Light; family: Theme.fontFamily }
                 }
 
                 FocusButton {

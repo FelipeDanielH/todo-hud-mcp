@@ -27,7 +27,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 text: root.header
                 color: Theme.text
-                font { pixelSize: 16; weight: Font.Bold; family: Theme.fontFamily }
+                font { pixelSize: 15; weight: Font.Bold; family: Theme.fontFamily }
                 elide: Text.ElideRight
             }
 
@@ -43,7 +43,7 @@ Rectangle {
                 Text {
                     id: badgeLabel
                     anchors.centerIn: parent
-                    color: "#0f0f1a"
+                    color: Theme.bg
                     font { pixelSize: 10; weight: Font.Bold; family: Theme.fontFamily }
                     text: root.badge
                 }

@@ -2,19 +2,19 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    readonly property color bg:       "#0f0f1a"
-    readonly property color card:     "#1a1a2e"
-    readonly property color border:   "#2a2a4a"
-    readonly property color accent:   "#00d4aa"
-    readonly property color accentPressed: "#00b898"
-    readonly property color text:     "#e0e0e0"
-    readonly property color dimText:  "#8888aa"
-    readonly property color success:  "#00d4aa"
+    readonly property color bg:       "#101118"
+    readonly property color card:     "#191b27"
+    readonly property color border:   "#303548"
+    readonly property color accent:   "#22d3a6"
+    readonly property color accentPressed: "#16b894"
+    readonly property color text:     "#f2f4f8"
+    readonly property color dimText:  "#9aa3b8"
+    readonly property color success:  "#22d3a6"
     readonly property color pending:  "#ff6b6b"
-    readonly property color badge:    "#00d4aa"
+    readonly property color badge:    "#22d3a6"
 
-    readonly property int radius:     14
-    readonly property int padding:    20
-    readonly property int spacing:    12
+    readonly property int radius:     12
+    readonly property int padding:    18
+    readonly property int spacing:    10
     readonly property string fontFamily: "Segoe UI"
 }

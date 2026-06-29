@@ -11,7 +11,7 @@ Item {
 
     signal selected(int taskId)
 
-    implicitHeight: 32
+    implicitHeight: 30
     height: implicitHeight
 
     RowLayout {
@@ -20,9 +20,9 @@ Item {
 
         Rectangle {
             Layout.alignment: Qt.AlignVCenter
-            Layout.preferredWidth: 10
-            Layout.preferredHeight: 10
-            radius: 5
+            Layout.preferredWidth: 9
+            Layout.preferredHeight: 9
+            radius: 4.5
             color: root.completed ? Theme.success : Theme.pending
         }
 
@@ -31,7 +31,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             text: root.title
             color: root.completed ? Theme.dimText : Theme.text
-            font { pixelSize: 13; family: Theme.fontFamily }
+            font { pixelSize: 12; family: Theme.fontFamily }
             elide: Text.ElideRight
             opacity: root.completed ? 0.6 : 1.0
         }
