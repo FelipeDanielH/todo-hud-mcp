@@ -7,6 +7,9 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2)
 
+qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0004 NEW)
+
 qt_add_executable(FocusHud
     src/main.cpp
     src/application/TaskService.cpp
@@ -23,6 +26,10 @@ qt_add_executable(FocusHud
 
 set_source_files_properties(src/qml/theme/Theme.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
+)
+
+target_include_directories(FocusHud PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 qt_add_qml_module(FocusHud
