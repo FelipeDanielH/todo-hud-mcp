@@ -24,7 +24,7 @@ Rectangle {
             Text {
                 text: root.header
                 color: Theme.text
-                font { pixelSize: 16; weight: Font.Bold; family: Theme.family }
+                font { pixelSize: 16; weight: Font.Bold; family: Theme.fontFamily }
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -41,7 +41,7 @@ Rectangle {
                     id: badgeLabel
                     anchors.centerIn: parent
                     color: "#0f0f1a"
-                    font { pixelSize: 10; weight: Font.Bold; family: Theme.family }
+                    font { pixelSize: 10; weight: Font.Bold; family: Theme.fontFamily }
                     text: root.badge
                 }
             }

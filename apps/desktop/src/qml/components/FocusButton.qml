@@ -19,7 +19,7 @@ Button {
         text: root.label
         anchors.centerIn: parent
         color: "#0f0f1a"
-        font { pixelSize: 14; weight: Font.Bold; family: Theme.family }
+        font { pixelSize: 14; weight: Font.Bold; family: Theme.fontFamily }
         horizontalAlignment: Text.AlignHCenter
     }
 

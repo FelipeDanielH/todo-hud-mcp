@@ -33,7 +33,7 @@ Window {
                     width: parent.width
                     text: "Ahora"
                     color: Theme.dimText
-                    font { pixelSize: 11; letterSpacing: 2; family: Theme.family }
+                    font { pixelSize: 11; letterSpacing: 2; family: Theme.fontFamily }
                 }
 
                 Text {
@@ -43,7 +43,7 @@ Window {
                           ? app.currentTaskTitle
                           : "Sin tarea activa"
                     color: app.hasActiveTask ? Theme.text : Theme.dimText
-                    font { pixelSize: 15; weight: Font.DemiBold; family: Theme.family }
+                    font { pixelSize: 15; weight: Font.DemiBold; family: Theme.fontFamily }
                     elide: Text.ElideRight
                 }
 
@@ -53,7 +53,7 @@ Window {
                     horizontalAlignment: Text.AlignHCenter
                     text: app.focusTimer.formattedTime
                     color: Theme.text
-                    font { pixelSize: 42; weight: Font.Light; family: Theme.family }
+                    font { pixelSize: 42; weight: Font.Light; family: Theme.fontFamily }
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
 

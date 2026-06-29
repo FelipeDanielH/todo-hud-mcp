@@ -6,6 +6,7 @@ QtObject {
     readonly property color card:     "#1a1a2e"
     readonly property color border:   "#2a2a4a"
     readonly property color accent:   "#00d4aa"
+    readonly property color accentPressed: "#00b898"
     readonly property color text:     "#e0e0e0"
     readonly property color dimText:  "#8888aa"
     readonly property color success:  "#00d4aa"
@@ -15,5 +16,5 @@ QtObject {
     readonly property int radius:     14
     readonly property int padding:    20
     readonly property int spacing:    12
-    readonly property font family:    "Segoe UI, 'Helvetica Neue', Arial, sans-serif"
+    readonly property string fontFamily: "Segoe UI"
 }

@@ -20,7 +20,7 @@ Row {
     Text {
         text: root.title
         color: root.completed ? Theme.dimText : Theme.text
-        font { pixelSize: 13; family: Theme.family }
+        font { pixelSize: 13; family: Theme.fontFamily }
         elide: Text.ElideRight
         width: parent.parent.width - 20
         opacity: root.completed ? 0.6 : 1.0
