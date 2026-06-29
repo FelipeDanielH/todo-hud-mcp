@@ -1,7 +1,7 @@
 services:
   focus-hud:
     build:
-      context: .
+      context: ./apps/api
       dockerfile: Dockerfile
     container_name: focus-hud
     restart: unless-stopped

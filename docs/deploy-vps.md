@@ -32,9 +32,19 @@ cd todo-hud-mcp
 
 ## 3. Configurar entorno
 
+Las variables de entorno ya están definidas en `docker-compose.yml`.
+Opcionalmente, crear `.env` en la raíz para override:
+
 ```bash
+# No es necesario — valores por defecto en docker-compose.yml funcionan
+# Opcional: crear .env en la raíz para override
+```
+
+Para desarrollo local dentro de `apps/api/`:
+
+```bash
+cd apps/api
 cp .env.example .env
-# Editar .env si es necesario (valores por defecto funcionan)
 ```
 
 ## 4. Construir y levantar
@@ -173,18 +183,25 @@ https://focus-hud.tudominio.com/mcp
 | `docker volume ls`                           | Listar volúmenes                    |
 | `docker compose ps`                          | Estado del contenedor               |
 
-## Estructura de archivos para producción
+## Estructura del monorepo
 
 ```
-todo-hud-mcp/
-├── Dockerfile              # Multi-stage build
-├── .dockerignore           # Excluye node_modules, dist, etc.
+focus-hud/
+├── apps/
+│   └── api/                # Backend NestJS (REST + MCP)
+│       ├── Dockerfile      # Multi-stage build
+│       ├── .dockerignore
+│       ├── package.json
+│       ├── tsconfig.json
+│       ├── src/…           # Código fuente hexagonal
+│       └── .env.example    # Template de entorno
+├── infra/
+│   └── docker/             # Docker configs auxiliares
 ├── docker-compose.yml      # Orquestación con healthcheck + volumen
-├── .env                    # Variables de entorno (no versionado)
-├── .env.example            # Template de configuración
 ├── docs/
 │   └── deploy-vps.md       # Esta guía
-└── src/…                   # Código fuente (compilado en builder stage)
+└── packages/
+    └── shared/             # Contratos compartidos (futuro)
 ```
 
 El volumen `focus-hud-data` persiste `tasks.json` en `/data` dentro del contenedor.
