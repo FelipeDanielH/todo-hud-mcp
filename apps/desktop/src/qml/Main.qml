@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
+import QtQuick.Controls
 import FocusHUD
 
 Window {
@@ -16,7 +17,8 @@ Window {
     color: "transparent"
 
     property bool compactMode: false
-    height: 500
+    property bool showHistory: false
+    height: win.compactMode ? 64 : 500
 
     Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
     Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
@@ -33,23 +35,19 @@ Window {
 
     component WindowControl: Rectangle {
         id: control
-
         required property string label
         property color hoverColor: Theme.border
         signal clicked()
-
         Layout.preferredWidth: 26
         Layout.preferredHeight: 24
         radius: 6
         color: mouse.containsMouse ? control.hoverColor : "transparent"
-
         Text {
             anchors.centerIn: parent
             text: control.label
             color: Theme.text
             font { pixelSize: 13; weight: Font.Bold; family: Theme.fontFamily }
         }
-
         MouseArea {
             id: mouse
             anchors.fill: parent
@@ -71,47 +69,186 @@ Window {
             anchors.margins: Theme.padding
             spacing: Theme.spacing
 
+            // --- Active tasks card (fills remaining space) ---
             HudCard {
-                id: listCard
+                id: activeCard
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                visible: !win.compactMode
+                visible: !win.compactMode && !win.showHistory
                 header: "Tareas"
-                badge: ""
+                badge: win.app.online ? "" : "Offline"
 
                 ListView {
+                    id: activeList
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
-                    spacing: Theme.spacing
+                    spacing: 6
                     model: win.app.taskListModel
 
-                    delegate: TaskItem {
+                    delegate: Item {
+                        readonly property bool isSection: model.status === "section-completed"
+                        implicitHeight: isSection ? 30 : (model.phaseName && model.phaseName.length > 0 && model.status !== "completed" ? 42 : 32)
                         width: ListView.view.width
-                        onSelected: function(taskId) { win.app.selectTask(taskId) }
+
+                        TaskItem {
+                            visible: !isSection
+                            anchors.fill: parent
+                            taskId: model.taskId
+                            title: model.title
+                            completed: model.completed
+                            status: model.status
+                            phaseName: model.phaseName ?? ""
+                            sortOrder: model.sortOrder ?? 0
+                            onToggleComplete: function(tid) {
+                                if (model.completed)
+                                    win.app.reopenTask(tid)
+                                else
+                                    win.app.completeTask(tid)
+                            }
+                        }
+
+                        Rectangle {
+                            visible: isSection
+                            anchors.fill: parent
+                            color: "transparent"
+                            Text {
+                                anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                                text: model.title ?? ""
+                                color: Theme.dimText
+                                font { pixelSize: 11; weight: Font.Bold; letterSpacing: 1; family: Theme.fontFamily }
+                            }
+                        }
                     }
                 }
             }
 
+            // --- Add task input ---
+            Rectangle {
+                id: inputRow
+                Layout.fillWidth: true
+                Layout.preferredHeight: 36
+                visible: !win.compactMode && !win.showHistory
+                color: Theme.card
+                radius: 8
+                border { color: Theme.border; width: 1 }
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 4
+                    anchors.topMargin: 2
+                    anchors.bottomMargin: 2
+                    spacing: 6
+
+                    TextInput {
+                        id: taskInput
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        color: Theme.text
+                        font { pixelSize: 12; family: Theme.fontFamily }
+                        placeholderText: "Add a task..."
+                        placeholderTextColor: Theme.dimText
+                        verticalAlignment: TextInput.AlignVCenter
+                        onAccepted: {
+                            if (text.trim().length > 0) {
+                                win.app.createTask(text.trim())
+                                text = ""
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.preferredWidth: 28
+                        Layout.preferredHeight: 28
+                        radius: 6
+                        color: mouseAdd.containsMouse ? Theme.accentPressed : Theme.accent
+                        Layout.alignment: Qt.AlignVCenter
+                        Text {
+                            anchors.centerIn: parent
+                            text: "+"
+                            color: Theme.bg
+                            font { pixelSize: 18; weight: Font.Bold; family: Theme.fontFamily }
+                        }
+                        MouseArea {
+                            id: mouseAdd
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
+                            onClicked: {
+                                if (taskInput.text.trim().length > 0) {
+                                    win.app.createTask(taskInput.text.trim())
+                                    taskInput.text = ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- Action buttons ---
+            RowLayout {
+                Layout.fillWidth: true
+                visible: !win.compactMode && !win.showHistory
+                spacing: 6
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 32
+                    radius: 6
+                    color: mouseArchive.containsMouse ? Theme.accentPressed : Theme.accent
+                    visible: win.app.completedCount > 0
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Archive completed (%1)".arg(win.app.completedCount)
+                        color: Theme.bg
+                        font { pixelSize: 11; weight: Font.Bold; family: Theme.fontFamily }
+                    }
+                    MouseArea {
+                        id: mouseArchive
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: win.app.archiveCompleted()
+                    }
+                }
+
+                Rectangle {
+                    Layout.preferredWidth: 60
+                    Layout.preferredHeight: 32
+                    radius: 6
+                    color: mouseHistoryBtn.containsMouse ? Theme.accentPressed : Theme.accent
+                    Text {
+                        anchors.centerIn: parent
+                        text: "History"
+                        color: Theme.bg
+                        font { pixelSize: 11; weight: Font.Bold; family: Theme.fontFamily }
+                    }
+                    MouseArea {
+                        id: mouseHistoryBtn
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: win.showHistory = !win.showHistory
+                    }
+                }
+            }
+
+            // --- Compact mode bar ---
             Rectangle {
                 id: compactBar
                 visible: win.compactMode
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 color: "transparent"
-
                 Text {
-                    anchors {
-                        left: parent.left; leftMargin: 4
-                        verticalCenter: parent.verticalCenter
-                    }
+                    anchors { left: parent.left; leftMargin: 4; verticalCenter: parent.verticalCenter }
                     text: win.app.hasActiveTask ? win.app.currentTaskTitle : "Focus HUD"
                     color: Theme.text
                     font { pixelSize: 15; weight: Font.DemiBold; family: Theme.fontFamily }
                     elide: Text.ElideRight
                     width: parent.width - 8
                 }
-
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -119,6 +256,14 @@ Window {
                     onClicked: win.compactMode = false
                     onPressed: win.startSystemMove()
                 }
+            }
+
+            // --- History panel ---
+            HistoryPanel {
+                visible: win.showHistory && !win.compactMode
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                onClose: win.showHistory = false
             }
         }
 
@@ -149,12 +294,10 @@ Window {
                 topMargin: 10
                 rightMargin: 10
             }
-
             WindowControl {
                 label: win.compactMode ? "+" : "-"
                 onClicked: win.compactMode = !win.compactMode
             }
-
             WindowControl {
                 label: "X"
                 hoverColor: Theme.pending

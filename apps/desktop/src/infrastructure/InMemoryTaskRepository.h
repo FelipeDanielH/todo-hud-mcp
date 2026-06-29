@@ -8,6 +8,10 @@ public:
     QVector<Task> all() const override;
     Task getById(int id) const override;
     void update(const Task& task) override;
+    void save(const Task& task) override;
+    QVector<Task> archived() const override;
+    QJsonObject archiveCompletedTasks(const QString& phaseId = {}) override;
+    QJsonObject createBatch(const QString& phaseName, const QStringList& titles) override;
 
 private:
     QVector<Task> m_tasks;

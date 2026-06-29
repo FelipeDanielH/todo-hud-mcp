@@ -14,6 +14,8 @@ qt_add_executable(FocusHud
     src/main.cpp
     src/application/TaskService.cpp
     src/application/TaskService.h
+    src/infrastructure/ApiTaskRepository.cpp
+    src/infrastructure/ApiTaskRepository.h
     src/infrastructure/InMemoryTaskRepository.cpp
     src/infrastructure/InMemoryTaskRepository.h
     src/presentation/AppController.cpp
@@ -46,6 +48,7 @@ qt_add_qml_module(FocusHud
         src/qml/components/HudCard.qml
         src/qml/components/TaskItem.qml
         src/qml/components/FocusButton.qml
+        src/qml/components/HistoryPanel.qml
         src/qml/theme/Theme.qml
 )
 
@@ -55,4 +58,5 @@ target_link_libraries(FocusHud PRIVATE
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
+    Qt6::Network
 )

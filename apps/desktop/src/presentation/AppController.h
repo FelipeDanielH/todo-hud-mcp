@@ -27,28 +27,38 @@ class AppController : public QObject {
     Q_PROPERTY(bool hasActiveTask READ hasActiveTask NOTIFY currentTaskChanged)
     Q_PROPERTY(TaskListModel* taskListModel READ taskListModel CONSTANT)
     Q_PROPERTY(FocusTimerController* focusTimer READ focusTimer CONSTANT)
+    Q_PROPERTY(int completedCount READ completedCount NOTIFY dataChanged)
+    Q_PROPERTY(bool online READ isOnline CONSTANT)
 
 public:
     explicit AppController(TaskService& taskService,
                            TaskListModel& taskListModel,
                            FocusTimerController& focusTimer,
+                           bool online,
                            QObject* parent = nullptr);
 
     QString currentTaskTitle() const;
     bool hasActiveTask() const;
     TaskListModel* taskListModel() const;
     FocusTimerController* focusTimer() const;
+    int completedCount() const;
+    bool isOnline() const;
 
     Q_INVOKABLE void selectTask(int id);
     Q_INVOKABLE void completeCurrentTask();
     Q_INVOKABLE void reopenTask(int id);
+    Q_INVOKABLE void completeTask(int id);
+    Q_INVOKABLE void createTask(const QString& title);
+    Q_INVOKABLE void archiveCompleted();
 
 signals:
     void currentTaskChanged();
+    void dataChanged();
 
 private:
     TaskService& m_taskService;
     TaskListModel& m_taskListModel;
     FocusTimerController& m_focusTimer;
     int m_currentTaskId = -1;
+    bool m_online = false;
 };
