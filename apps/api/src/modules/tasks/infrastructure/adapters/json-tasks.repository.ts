@@ -59,7 +59,11 @@ export class JsonTasksRepository implements TasksRepositoryPort {
         this.tasks = [];
         this.persist();
       }
-    } catch {
+    } catch (err) {
+      console.warn('Failed to load tasks file, starting with an empty store:', err);
+      if (fs.existsSync(this.filePath)) {
+        this.backup();
+      }
       this.tasks = [];
       this.persist();
     }
