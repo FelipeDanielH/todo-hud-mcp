@@ -1,34 +1,28 @@
 #include <QVector>
+#include <QDebug>
 #include "AppController.h"
 #include "application/TaskService.h"
-#include "infrastructure/WebSocketClient.h"
+#include "application/TaskEventsClient.h"
 
 AppController::AppController(TaskService& taskService,
                              TaskListModel& taskListModel,
                              FocusTimerController& focusTimer,
                              bool online,
-                             WebSocketClient* wsClient,
+                             TaskEventsClient* eventsClient,
                              QObject* parent)
     : QObject(parent)
     , m_taskService(taskService)
     , m_taskListModel(taskListModel)
     , m_focusTimer(focusTimer)
-    , m_wsClient(wsClient)
+    , m_eventsClient(eventsClient)
     , m_online(online)
 {
-    auto active = m_taskService.activeTasks();
-    if (!active.isEmpty()) {
-        m_currentTaskId = active.first().id;
-    } else {
-        auto all = m_taskService.allTasks();
-        if (!all.isEmpty())
-            m_currentTaskId = all.first().id;
-    }
+    syncCurrentTaskSelection();
 
-    if (m_wsClient) {
-        connect(m_wsClient, &WebSocketClient::tasksChanged, this, &AppController::onWsTasksChanged);
-        connect(m_wsClient, &WebSocketClient::stateChanged, this, &AppController::wsStateChanged);
-        m_wsClient->connectToServer();
+    if (m_eventsClient) {
+        connect(m_eventsClient, &TaskEventsClient::tasksChanged, this, &AppController::onWsTasksChanged);
+        connect(m_eventsClient, &TaskEventsClient::stateChanged, this, &AppController::wsStateChanged);
+        m_eventsClient->connectToServer();
     }
 }
 
@@ -61,18 +55,19 @@ int AppController::completedCount() const
 
 bool AppController::isOnline() const
 {
-    return m_online || (m_wsClient && m_wsClient->state() == WebSocketClient::Connected);
+    return m_online || (m_eventsClient && m_eventsClient->state() == TaskEventsClient::Connected);
 }
 
 int AppController::wsState() const
 {
-    return m_wsClient ? static_cast<int>(m_wsClient->state()) : 0;
+    return m_eventsClient ? static_cast<int>(m_eventsClient->state()) : 0;
 }
 
 void AppController::onWsTasksChanged()
 {
     qDebug().noquote() << QStringLiteral("[AppController] WebSocket event — refreshing tasks via GET /tasks");
     m_taskListModel.refresh();
+    syncCurrentTaskSelection();
     emit dataChanged();
 }
 
@@ -80,6 +75,7 @@ void AppController::forceRefresh()
 {
     qDebug().noquote() << QStringLiteral("[AppController] Manual refresh triggered");
     m_taskListModel.refresh();
+    syncCurrentTaskSelection();
     emit dataChanged();
 }
 
@@ -110,15 +106,14 @@ void AppController::completeCurrentTask()
     m_focusTimer.reset();
     emit dataChanged();
 
-    auto active = m_taskService.activeTasks();
-    m_currentTaskId = active.isEmpty() ? -1 : active.first().id;
-    emit currentTaskChanged();
+    syncCurrentTaskSelection();
 }
 
 void AppController::reopenTask(int id)
 {
     m_taskService.reopenTask(id);
     m_taskListModel.refresh();
+    syncCurrentTaskSelection();
     emit dataChanged();
 }
 
@@ -126,6 +121,7 @@ void AppController::completeTask(int id)
 {
     m_taskService.completeTask(id);
     m_taskListModel.refresh();
+    syncCurrentTaskSelection();
     emit dataChanged();
 }
 
@@ -135,6 +131,7 @@ void AppController::createTask(const QString& title)
         return;
     m_taskService.createTask(title.trimmed());
     m_taskListModel.refresh();
+    syncCurrentTaskSelection();
     emit dataChanged();
 }
 
@@ -142,5 +139,30 @@ void AppController::archiveCompleted()
 {
     m_taskService.archiveCompleted();
     m_taskListModel.refresh();
+    syncCurrentTaskSelection();
     emit dataChanged();
+}
+
+void AppController::syncCurrentTaskSelection()
+{
+    const int previousTaskId = m_currentTaskId;
+    const auto active = m_taskListModel.activeTasks();
+    const auto completed = m_taskListModel.completedTasks();
+
+    for (const auto& task : active) {
+        if (task.id == m_currentTaskId) {
+            return;
+        }
+    }
+
+    if (!active.isEmpty()) {
+        m_currentTaskId = active.first().id;
+    } else if (!completed.isEmpty()) {
+        m_currentTaskId = completed.first().id;
+    } else {
+        m_currentTaskId = -1;
+    }
+
+    if (previousTaskId != m_currentTaskId)
+        emit currentTaskChanged();
 }

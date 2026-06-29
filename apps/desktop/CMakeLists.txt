@@ -5,7 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network Qml Quick QuickControls2)
+find_package(Qt6 QUIET COMPONENTS WebSockets)
 
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
@@ -14,12 +15,11 @@ qt_add_executable(FocusHud
     src/main.cpp
     src/application/TaskService.cpp
     src/application/TaskService.h
+    src/application/TaskEventsClient.h
     src/infrastructure/ApiTaskRepository.cpp
     src/infrastructure/ApiTaskRepository.h
     src/infrastructure/InMemoryTaskRepository.cpp
     src/infrastructure/InMemoryTaskRepository.h
-    src/infrastructure/WebSocketClient.cpp
-    src/infrastructure/WebSocketClient.h
     src/presentation/AppController.cpp
     src/presentation/AppController.h
     src/presentation/TaskListModel.cpp
@@ -42,6 +42,14 @@ target_compile_options(FocusHud PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
+if(Qt6WebSockets_FOUND)
+    target_sources(FocusHud PRIVATE
+        src/infrastructure/WebSocketClient.cpp
+        src/infrastructure/WebSocketClient.h
+    )
+    target_compile_definitions(FocusHud PRIVATE FOCUSHUD_HAS_QT_WEBSOCKETS=1)
+endif()
+
 qt_add_qml_module(FocusHud
     URI FocusHUD
     VERSION 0.1
@@ -62,3 +70,7 @@ target_link_libraries(FocusHud PRIVATE
     Qt6::QuickControls2
     Qt6::Network
 )
+
+if(Qt6WebSockets_FOUND)
+    target_link_libraries(FocusHud PRIVATE Qt6::WebSockets)
+endif()

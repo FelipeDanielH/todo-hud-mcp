@@ -5,7 +5,7 @@
 #include "FocusTimerController.h"
 
 class TaskService;
-class WebSocketClient;
+class TaskEventsClient;
 
 struct TaskListModelQmlForeign {
     Q_GADGET
@@ -37,7 +37,7 @@ public:
                            TaskListModel& taskListModel,
                            FocusTimerController& focusTimer,
                            bool online,
-                           WebSocketClient* wsClient = nullptr,
+                           TaskEventsClient* eventsClient = nullptr,
                            QObject* parent = nullptr);
 
     QString currentTaskTitle() const;
@@ -63,11 +63,12 @@ signals:
 
 private:
     void onWsTasksChanged();
+    void syncCurrentTaskSelection();
 
     TaskService& m_taskService;
     TaskListModel& m_taskListModel;
     FocusTimerController& m_focusTimer;
-    WebSocketClient* m_wsClient = nullptr;
+    TaskEventsClient* m_eventsClient = nullptr;
     int m_currentTaskId = -1;
     bool m_online = false;
 };
