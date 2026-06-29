@@ -11,10 +11,25 @@ Window {
     required property AppController app
 
     width: 348
-    height: 500
     visible: true
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
     color: "transparent"
+
+    property bool compactMode: false
+    height: 500
+
+    Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
+    Behavior on y { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
+
+    onCompactModeChanged: {
+        if (win.compactMode) {
+            win.y += win.height - 64
+            win.height = 64
+        } else {
+            win.height = 500
+            win.y -= 500 - 64
+        }
+    }
 
     component WindowControl: Rectangle {
         id: control
@@ -56,57 +71,11 @@ Window {
             anchors.margins: Theme.padding
             spacing: Theme.spacing
 
-            // HudCard {
-            //     id: activeCard
-            //     Layout.fillWidth: true
-            //     Layout.preferredHeight: 210
-            //     header: "Focus HUD"
-            //     badge: "MCP"
-            //
-            //     Text {
-            //         Layout.fillWidth: true
-            //         text: "Ahora"
-            //         color: Theme.dimText
-            //         font { pixelSize: 11; letterSpacing: 2; family: Theme.fontFamily }
-            //     }
-            //
-            //     Text {
-            //         id: activeTaskLabel
-            //         Layout.fillWidth: true
-            //         text: win.app.hasActiveTask
-            //               ? win.app.currentTaskTitle
-            //               : "Sin tarea activa"
-            //         color: win.app.hasActiveTask ? Theme.text : Theme.dimText
-            //         font { pixelSize: 15; weight: Font.DemiBold; family: Theme.fontFamily }
-            //         elide: Text.ElideRight
-            //     }
-            //
-            //     Text {
-            //         id: timerDisplay
-            //         Layout.fillWidth: true
-            //         horizontalAlignment: Text.AlignHCenter
-            //         text: win.app.focusTimer.formattedTime
-            //         color: Theme.text
-            //         font { pixelSize: 46; weight: Font.Light; family: Theme.fontFamily }
-            //     }
-            //
-            //     FocusButton {
-            //         id: focusBtn
-            //         Layout.fillWidth: true
-            //         label: win.app.focusTimer.isRunning ? "Detener foco" : "Iniciar foco"
-            //         onClicked: {
-            //             if (win.app.focusTimer.isRunning)
-            //                 win.app.focusTimer.stop()
-            //             else
-            //                 win.app.focusTimer.start()
-            //         }
-            //     }
-            // }
-
             HudCard {
                 id: listCard
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                visible: !win.compactMode
                 header: "Tareas"
                 badge: ""
 
@@ -123,10 +92,39 @@ Window {
                     }
                 }
             }
+
+            Rectangle {
+                id: compactBar
+                visible: win.compactMode
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: "transparent"
+
+                Text {
+                    anchors {
+                        left: parent.left; leftMargin: 4
+                        verticalCenter: parent.verticalCenter
+                    }
+                    text: win.app.hasActiveTask ? win.app.currentTaskTitle : "Focus HUD"
+                    color: Theme.text
+                    font { pixelSize: 15; weight: Font.DemiBold; family: Theme.fontFamily }
+                    elide: Text.ElideRight
+                    width: parent.width - 8
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.LeftButton
+                    onClicked: win.compactMode = false
+                    onPressed: win.startSystemMove()
+                }
+            }
         }
 
         MouseArea {
             id: dragArea
+            enabled: !win.compactMode
             height: 42
             anchors {
                 top: parent.top
@@ -153,8 +151,8 @@ Window {
             }
 
             WindowControl {
-                label: "-"
-                onClicked: win.showMinimized()
+                label: win.compactMode ? "+" : "-"
+                onClicked: win.compactMode = !win.compactMode
             }
 
             WindowControl {
