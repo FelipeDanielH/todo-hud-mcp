@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Window
-import QtQuick.Controls
+import QtQuick.Layouts
 import FocusHUD
 
 Window {
@@ -17,20 +17,20 @@ Window {
         color: Theme.bg
         radius: Theme.radius
 
-        Column {
+        ColumnLayout {
             anchors.fill: parent
             anchors.margins: Theme.padding
             spacing: Theme.spacing
 
             HudCard {
                 id: activeCard
-                width: parent.width
-                height: 180
+                Layout.fillWidth: true
+                Layout.preferredHeight: 220
                 header: "Focus HUD"
                 badge: "MCP"
 
                 Text {
-                    width: parent.width
+                    Layout.fillWidth: true
                     text: "Ahora"
                     color: Theme.dimText
                     font { pixelSize: 11; letterSpacing: 2; family: Theme.fontFamily }
@@ -38,7 +38,7 @@ Window {
 
                 Text {
                     id: activeTaskLabel
-                    width: parent.width
+                    Layout.fillWidth: true
                     text: app.hasActiveTask
                           ? app.currentTaskTitle
                           : "Sin tarea activa"
@@ -49,16 +49,16 @@ Window {
 
                 Text {
                     id: timerDisplay
-                    width: parent.width
+                    Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     text: app.focusTimer.formattedTime
                     color: Theme.text
                     font { pixelSize: 42; weight: Font.Light; family: Theme.fontFamily }
-                    anchors.horizontalCenter: parent.horizontalCenter
                 }
 
                 FocusButton {
                     id: focusBtn
+                    Layout.fillWidth: true
                     label: app.focusTimer.isRunning ? "Detener foco" : "Iniciar foco"
                     onClicked: {
                         if (app.focusTimer.isRunning)
@@ -69,20 +69,22 @@ Window {
                 }
             }
 
-            Item { width: 1; height: 6 }
-
             HudCard {
                 id: listCard
-                width: parent.width
-                height: win.height - activeCard.height - Theme.padding * 5 - 8
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 header: "Tareas"
                 badge: ""
 
-                Repeater {
+                ListView {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    spacing: Theme.spacing
                     model: app.taskListModel
 
                     delegate: TaskItem {
-                        width: parent.width
+                        width: ListView.view.width
                         onSelected: function(taskId) { app.selectTask(taskId) }
                     }
                 }

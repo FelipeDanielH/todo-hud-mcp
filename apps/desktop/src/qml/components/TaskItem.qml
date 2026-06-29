@@ -1,7 +1,8 @@
 import QtQuick
+import QtQuick.Layouts
 import FocusHUD
 
-Row {
+Item {
     id: root
 
     required property int taskId
@@ -10,24 +11,30 @@ Row {
 
     signal selected(int taskId)
 
-    spacing: 10
-    height: 28
+    implicitHeight: 32
+    height: implicitHeight
 
-    Rectangle {
-        width: 10; height: 10
-        radius: 5
-        anchors.verticalCenter: parent.verticalCenter
-        color: root.completed ? Theme.success : Theme.pending
-    }
+    RowLayout {
+        anchors.fill: parent
+        spacing: 10
 
-    Text {
-        text: root.title
-        color: root.completed ? Theme.dimText : Theme.text
-        font { pixelSize: 13; family: Theme.fontFamily }
-        elide: Text.ElideRight
-        width: parent.parent.width - 20
-        opacity: root.completed ? 0.6 : 1.0
-        anchors.verticalCenter: parent.verticalCenter
+        Rectangle {
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: 10
+            Layout.preferredHeight: 10
+            radius: 5
+            color: root.completed ? Theme.success : Theme.pending
+        }
+
+        Text {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+            text: root.title
+            color: root.completed ? Theme.dimText : Theme.text
+            font { pixelSize: 13; family: Theme.fontFamily }
+            elide: Text.ElideRight
+            opacity: root.completed ? 0.6 : 1.0
+        }
     }
 
     MouseArea {

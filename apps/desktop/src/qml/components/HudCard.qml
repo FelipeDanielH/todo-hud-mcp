@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import FocusHUD
 
 Rectangle {
@@ -12,29 +13,31 @@ Rectangle {
     radius: Theme.radius
     border { color: Theme.border; width: 1 }
 
-    Column {
+    ColumnLayout {
         anchors.fill: parent
         anchors.margins: Theme.padding
         spacing: Theme.spacing
 
-        Row {
-            width: parent.width
+        RowLayout {
+            Layout.fillWidth: true
             spacing: 10
 
             Text {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
                 text: root.header
                 color: Theme.text
                 font { pixelSize: 16; weight: Font.Bold; family: Theme.fontFamily }
-                anchors.verticalCenter: parent.verticalCenter
+                elide: Text.ElideRight
             }
 
             Rectangle {
                 id: badgeRect
-                height: 20
-                width: badgeLabel.width + 12
+                Layout.alignment: Qt.AlignVCenter
+                implicitHeight: 20
+                implicitWidth: badgeLabel.implicitWidth + 12
                 radius: 4
                 color: Theme.badge
-                anchors.verticalCenter: parent.verticalCenter
                 visible: root.badge.length > 0
 
                 Text {
@@ -47,11 +50,10 @@ Rectangle {
             }
         }
 
-        Item { width: 1; height: 4 }
-
-        Column {
+        ColumnLayout {
             id: contentArea
-            width: parent.width
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             spacing: Theme.spacing
         }
     }

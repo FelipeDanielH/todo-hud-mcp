@@ -7,8 +7,8 @@ Button {
 
     required property string label
 
-    width: parent ? parent.width : 0
-    height: 44
+    implicitWidth: 160
+    implicitHeight: 44
 
     background: Rectangle {
         radius: Theme.radius
