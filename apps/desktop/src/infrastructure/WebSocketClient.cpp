@@ -61,7 +61,7 @@ void WebSocketClient::onConnected()
 {
     resetReconnectDelay();
     setState(Connected);
-    qDebug().noquote() << QStringLiteral("[WebSocketClient] Connected to %1").arg(m_url.toString());
+    qDebug().noquote() << QStringLiteral("[WebSocketClient] Connected");
 }
 
 void WebSocketClient::onDisconnected()

@@ -4,26 +4,24 @@
 #include <QVariant>
 #include <QDebug>
 #include <QProcessEnvironment>
+#include <QUrl>
 #include "infrastructure/ApiTaskRepository.h"
 #include "infrastructure/InMemoryTaskRepository.h"
-#if FOCUSHUD_HAS_QT_WEBSOCKETS
-#include <QUrl>
 #include "infrastructure/WebSocketClient.h"
-#endif
 #include "application/TaskService.h"
 #include "presentation/TaskListModel.h"
 #include "presentation/FocusTimerController.h"
 #include "presentation/AppController.h"
 
-#if FOCUSHUD_HAS_QT_WEBSOCKETS
 static QUrl deriveWsUrl(const QString& apiUrl)
 {
     QUrl url(apiUrl);
     url.setScheme(url.scheme() == QStringLiteral("https") ? QStringLiteral("wss") : QStringLiteral("ws"));
     url.setPath(QStringLiteral("/ws/tasks"));
+    url.setQuery(QString());
+    url.setFragment(QString());
     return url;
 }
-#endif
 
 int main(int argc, char* argv[])
 {
@@ -57,16 +55,10 @@ int main(int argc, char* argv[])
     FocusTimerController focusTimer;
 
     TaskEventsClient* eventsClient = nullptr;
-#if FOCUSHUD_HAS_QT_WEBSOCKETS
     if (online) {
         const QUrl wsUrl = deriveWsUrl(apiUrl);
         eventsClient = new WebSocketClient(wsUrl, &app);
     }
-#else
-    if (online) {
-        qDebug().noquote() << QStringLiteral("[FocusHUD] Qt WebSockets module not available — live sync disabled, manual refresh remains available");
-    }
-#endif
 
     AppController appController(taskService, taskListModel, focusTimer, online, eventsClient);
 
