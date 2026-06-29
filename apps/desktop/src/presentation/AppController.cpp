@@ -47,6 +47,20 @@ FocusTimerController* AppController::focusTimer() const
 
 void AppController::selectTask(int id)
 {
+    if (id < 0)
+        return;
+
+    auto tasks = m_taskService->allTasks();
+    bool found = false;
+    for (const auto& t : tasks) {
+        if (t.id == id) {
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+        return;
+
     if (id == m_currentTaskId)
         return;
 
@@ -78,5 +92,4 @@ void AppController::reopenTask(int id)
 {
     m_taskService->reopenTask(id);
     m_taskListModel->refresh();
-    emit currentTaskChanged();
 }
