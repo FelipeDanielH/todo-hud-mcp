@@ -30,6 +30,7 @@ set_source_files_properties(src/qml/theme/Theme.qml PROPERTIES
 
 target_include_directories(FocusHud PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/presentation
 )
 
 qt_add_qml_module(FocusHud

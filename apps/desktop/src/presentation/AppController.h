@@ -1,12 +1,27 @@
 #pragma once
 #include <QObject>
+#include <QtQmlIntegration/qqmlintegration.h>
 #include "TaskListModel.h"
 #include "FocusTimerController.h"
 
 class TaskService;
 
+struct TaskListModelQmlForeign {
+    Q_GADGET
+    QML_FOREIGN(TaskListModel)
+    QML_ANONYMOUS
+};
+
+struct FocusTimerControllerQmlForeign {
+    Q_GADGET
+    QML_FOREIGN(FocusTimerController)
+    QML_ANONYMOUS
+};
+
 class AppController : public QObject {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("AppController is provided by the application")
     Q_PROPERTY(QString currentTaskTitle READ currentTaskTitle NOTIFY currentTaskChanged)
     Q_PROPERTY(bool hasActiveTask READ hasActiveTask NOTIFY currentTaskChanged)
     Q_PROPERTY(TaskListModel* taskListModel READ taskListModel CONSTANT)

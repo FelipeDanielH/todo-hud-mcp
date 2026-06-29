@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QQmlContext>
 #include <QQuickStyle>
+#include <QVariant>
 #include "infrastructure/InMemoryTaskRepository.h"
 #include "application/TaskService.h"
 #include "presentation/TaskListModel.h"
@@ -22,7 +22,9 @@ int main(int argc, char* argv[])
     AppController appController(&taskService, &taskListModel, &focusTimer);
 
     QQmlApplicationEngine engine;
-    engine.rootContext()->setContextProperty(QStringLiteral("app"), &appController);
+    engine.setInitialProperties({
+        {QStringLiteral("app"), QVariant::fromValue(&appController)},
+    });
     engine.loadFromModule(QStringLiteral("FocusHUD"), QStringLiteral("Main"));
 
     if (engine.rootObjects().isEmpty())

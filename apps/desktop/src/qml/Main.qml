@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
@@ -5,6 +7,9 @@ import FocusHUD
 
 Window {
     id: win
+
+    required property AppController app
+
     width: 348
     height: 500
     visible: true
@@ -68,10 +73,10 @@ Window {
                 Text {
                     id: activeTaskLabel
                     Layout.fillWidth: true
-                    text: app.hasActiveTask
-                          ? app.currentTaskTitle
+                    text: win.app.hasActiveTask
+                          ? win.app.currentTaskTitle
                           : "Sin tarea activa"
-                    color: app.hasActiveTask ? Theme.text : Theme.dimText
+                    color: win.app.hasActiveTask ? Theme.text : Theme.dimText
                     font { pixelSize: 15; weight: Font.DemiBold; family: Theme.fontFamily }
                     elide: Text.ElideRight
                 }
@@ -80,7 +85,7 @@ Window {
                     id: timerDisplay
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: app.focusTimer.formattedTime
+                    text: win.app.focusTimer.formattedTime
                     color: Theme.text
                     font { pixelSize: 46; weight: Font.Light; family: Theme.fontFamily }
                 }
@@ -88,12 +93,12 @@ Window {
                 FocusButton {
                     id: focusBtn
                     Layout.fillWidth: true
-                    label: app.focusTimer.isRunning ? "Detener foco" : "Iniciar foco"
+                    label: win.app.focusTimer.isRunning ? "Detener foco" : "Iniciar foco"
                     onClicked: {
-                        if (app.focusTimer.isRunning)
-                            app.focusTimer.stop()
+                        if (win.app.focusTimer.isRunning)
+                            win.app.focusTimer.stop()
                         else
-                            app.focusTimer.start()
+                            win.app.focusTimer.start()
                     }
                 }
             }
@@ -110,11 +115,11 @@ Window {
                     Layout.fillHeight: true
                     clip: true
                     spacing: Theme.spacing
-                    model: app.taskListModel
+                    model: win.app.taskListModel
 
                     delegate: TaskItem {
                         width: ListView.view.width
-                        onSelected: function(taskId) { app.selectTask(taskId) }
+                        onSelected: function(taskId) { win.app.selectTask(taskId) }
                     }
                 }
             }
